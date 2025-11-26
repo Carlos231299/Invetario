@@ -6,10 +6,12 @@
 set -e
 
 # Configuración
-PEM_FILE="plataforma2.0.pem"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+PEM_FILE="$PROJECT_ROOT/plataforma2.0.pem"
 SERVER="ubuntu@ec2-54-177-248-234.us-west-1.compute.amazonaws.com"
 APP_DIR="/var/www/inventario-ferreteria-bastidas"
-LOCAL_DIR="$(pwd)"
+LOCAL_DIR="$PROJECT_ROOT"
 
 echo "🚀 Iniciando despliegue en AWS..."
 
