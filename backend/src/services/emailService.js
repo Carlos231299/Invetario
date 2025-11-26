@@ -1,0 +1,50 @@
+import { sendEmail } from '../config/email.js';
+import crypto from 'crypto';
+
+export const sendPasswordResetEmail = async (email, resetToken) => {
+  const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}`;
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #2563eb; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; background-color: #f9fafb; }
+        .button { display: inline-block; padding: 12px 24px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+        .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>Recuperación de Contraseña</h1>
+        </div>
+        <div class="content">
+          <p>Hola,</p>
+          <p>Has solicitado restablecer tu contraseña para el sistema de Inventario Ferretería Bastidas.</p>
+          <p>Haz clic en el siguiente botón para restablecer tu contraseña:</p>
+          <a href="${resetUrl}" class="button">Restablecer Contraseña</a>
+          <p>O copia y pega este enlace en tu navegador:</p>
+          <p style="word-break: break-all; color: #2563eb;">${resetUrl}</p>
+          <p><strong>Este enlace expirará en 1 hora.</strong></p>
+          <p>Si no solicitaste este cambio, ignora este correo.</p>
+        </div>
+        <div class="footer">
+          <p>Inventario Ferretería Bastidas</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return await sendEmail(email, 'Recuperación de Contraseña - Inventario Ferretería Bastidas', html);
+};
+
+export const generateResetToken = () => {
+  return crypto.randomBytes(32).toString('hex');
+};
+

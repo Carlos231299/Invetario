@@ -1,0 +1,106 @@
+# Reglas de Arquitectura y Estándares - Inventario Ferretería Bastidas
+
+## Arquitectura del Proyecto
+
+### Separación Backend/Frontend
+- El backend está en `/backend` y el frontend en `/frontend`
+- No mezclar código de backend y frontend
+- El backend expone una API REST en `/api/*`
+- El frontend consume la API mediante servicios en `/frontend/src/services`
+
+### Estructura de Carpetas
+- **Backend**: `/backend/src` con subcarpetas: config, routes, controllers, models, services, middlewares, database, utils
+- **Frontend**: `/frontend/src` con subcarpetas: components, pages, hooks, services
+- **Scripts**: `/scripts` para scripts de despliegue y automatización
+- Respetar esta estructura, no crear archivos en ubicaciones incorrectas
+
+## Nomenclatura
+
+### Funciones y Variables
+- Usar **camelCase** para funciones y variables
+- Ejemplos: `getProducts()`, `userData`, `isLoading`
+
+### Componentes React
+- Usar **PascalCase** para componentes
+- Ejemplos: `ProductCard`, `UserList`, `Dashboard`
+
+### Archivos
+- Componentes: `PascalCase.jsx` (ej: `Button.jsx`, `ProductCard.jsx`)
+- Servicios: `camelCase.js` (ej: `productService.js`, `authService.js`)
+- Utilidades: `camelCase.js` (ej: `logger.js`, `validator.js`)
+
+### Constantes
+- Usar **UPPER_SNAKE_CASE** para constantes
+- Ejemplos: `API_URL`, `MAX_RETRIES`, `DEFAULT_TIMEOUT`
+
+## Buenas Prácticas
+
+### Validación
+- Siempre validar datos de entrada en el backend usando `express-validator`
+- Validar formularios en el frontend antes de enviar
+- Mostrar mensajes de error claros al usuario
+
+### Manejo de Errores
+- Usar try-catch en operaciones asíncronas
+- Manejar errores de forma centralizada (errorHandler middleware)
+- Mostrar mensajes de error amigables en el frontend
+- Registrar errores en el backend para debugging
+
+### Seguridad
+- Nunca exponer credenciales en el código
+- Usar variables de entorno para configuración sensible
+- Validar y sanitizar todas las entradas del usuario
+- Usar autenticación JWT para proteger rutas
+- Implementar roles y permisos (Admin/Operador)
+
+### Base de Datos
+- Usar transacciones para operaciones que modifican múltiples tablas
+- Registrar todos los movimientos en la bitácora
+- Validar integridad referencial
+- Usar índices apropiados para mejorar rendimiento
+
+### Código
+- Mantener funciones pequeñas y enfocadas
+- Evitar duplicación de código (DRY)
+- Comentar código complejo
+- Usar nombres descriptivos para variables y funciones
+- Agrupar imports: primero librerías externas, luego internas
+
+## Estandarización
+
+### JavaScript/ES6+
+- Usar `const` por defecto, `let` solo cuando sea necesario
+- Preferir arrow functions para callbacks
+- Usar template literals para strings
+- Usar destructuring cuando sea apropiado
+- Usar async/await en lugar de Promises.then()
+
+### React
+- Usar functional components con hooks
+- Extraer lógica reutilizable a custom hooks
+- Usar componentes pequeños y reutilizables
+- Evitar prop drilling, usar context cuando sea necesario
+- Mantener estado local cuando sea posible
+
+### API
+- Usar códigos HTTP apropiados (200, 201, 400, 401, 403, 404, 500)
+- Respuestas consistentes: `{ success: boolean, data: any, message?: string }`
+- Documentar endpoints importantes
+- Usar paginación para listas grandes
+
+### Git
+- Commits descriptivos y en español
+- No commitear archivos sensibles (.env, node_modules)
+- Usar .gitignore apropiadamente
+- Hacer commits frecuentes y pequeños
+
+## Estructura de Commits
+
+```
+Tipo: Descripción breve
+
+Descripción detallada (opcional)
+```
+
+Tipos: feat, fix, refactor, docs, style, test, chore
+

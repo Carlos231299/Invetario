@@ -1,0 +1,153 @@
+#!/bin/bash
+
+# Script para desplegar el proyecto en AWS
+# Conecta por SSH, instala dependencias, configura servicios
+
+set -e
+
+# Configuración
+PEM_FILE="plataforma2.0.pem"
+SERVER="ubuntu@ec2-54-177-248-234.us-west-1.compute.amazonaws.com"
+APP_DIR="/var/www/inventario-ferreteria-bastidas"
+LOCAL_DIR="$(pwd)"
+
+echo "🚀 Iniciando despliegue en AWS..."
+
+# Verificar que existe el archivo PEM
+if [ ! -f "$PEM_FILE" ]; then
+    echo "❌ Error: No se encuentra el archivo $PEM_FILE"
+    exit 1
+fi
+
+# Función para ejecutar comandos remotos
+ssh_exec() {
+    ssh -i "$PEM_FILE" -o StrictHostKeyChecking=no "$SERVER" "$1"
+}
+
+# Función para copiar archivos
+scp_copy() {
+    scp -i "$PEM_FILE" -r -o StrictHostKeyChecking=no "$1" "$SERVER:$2"
+}
+
+echo "📦 Instalando dependencias del sistema..."
+
+# Instalar Node.js si no existe
+ssh_exec "command -v node >/dev/null 2>&1 || {
+    echo 'Instalando Node.js...'
+    curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+}"
+
+# Instalar MySQL si no existe
+ssh_exec "command -v mysql >/dev/null 2>&1 || {
+    echo 'Instalando MySQL...'
+    sudo apt-get update
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server
+    sudo systemctl start mysql
+    sudo systemctl enable mysql
+}"
+
+# Instalar PM2 si no existe
+ssh_exec "command -v pm2 >/dev/null 2>&1 || {
+    echo 'Instalando PM2...'
+    sudo npm install -g pm2
+}"
+
+# Instalar Nginx si no existe
+ssh_exec "command -v nginx >/dev/null 2>&1 || {
+    echo 'Instalando Nginx...'
+    sudo apt-get install -y nginx
+    sudo systemctl start nginx
+    sudo systemctl enable nginx
+}"
+
+echo "📁 Creando directorio de aplicación..."
+ssh_exec "sudo mkdir -p $APP_DIR"
+ssh_exec "sudo chown -R ubuntu:ubuntu $APP_DIR"
+
+echo "📤 Subiendo archivos del proyecto..."
+
+# Subir backend
+echo "  - Subiendo backend..."
+scp_copy "$LOCAL_DIR/backend" "$APP_DIR/"
+
+# Subir frontend
+echo "  - Subiendo frontend..."
+scp_copy "$LOCAL_DIR/frontend" "$APP_DIR/"
+
+# Subir archivos de configuración
+echo "  - Subiendo archivos de configuración..."
+scp_copy "$LOCAL_DIR/scripts" "$APP_DIR/"
+scp_copy "$LOCAL_DIR/README.md" "$APP_DIR/"
+
+echo "🔧 Configurando backend..."
+
+# Instalar dependencias del backend
+ssh_exec "cd $APP_DIR/backend && npm install --production"
+
+# Crear .env desde .env.example
+ssh_exec "cd $APP_DIR/backend && if [ ! -f .env ]; then cp .env.example .env; fi"
+
+# Configurar base de datos
+echo "  - Configurando base de datos..."
+ssh_exec "sudo mysql -e \"CREATE DATABASE IF NOT EXISTS inventario_ferreteria_bastidas;\" || true"
+ssh_exec "cd $APP_DIR/backend && sudo mysql inventario_ferreteria_bastidas < src/database/schema.sql || true"
+
+# Configurar PM2
+echo "  - Configurando PM2..."
+ssh_exec "cd $APP_DIR/backend && pm2 delete inventario-backend || true"
+ssh_exec "cd $APP_DIR/backend && pm2 start server.js --name inventario-backend"
+ssh_exec "pm2 save"
+ssh_exec "pm2 startup | grep -v PM2 || true"
+
+echo "🏗️  Construyendo frontend..."
+
+# Instalar dependencias del frontend
+ssh_exec "cd $APP_DIR/frontend && npm install"
+
+# Build del frontend
+ssh_exec "cd $APP_DIR/frontend && npm run build"
+
+# Mover dist al directorio de Nginx
+ssh_exec "sudo rm -rf /var/www/html/inventario"
+ssh_exec "sudo mkdir -p /var/www/html/inventario"
+ssh_exec "sudo cp -r $APP_DIR/frontend/dist/* /var/www/html/inventario/"
+
+echo "🌐 Configurando Nginx..."
+
+# Crear configuración de Nginx
+ssh_exec "sudo tee /etc/nginx/sites-available/inventario > /dev/null <<EOF
+server {
+    listen 80;
+    server_name _;
+
+    root /var/www/html/inventario;
+    index index.html;
+
+    location / {
+        try_files \$uri \$uri/ /index.html;
+    }
+
+    location /api {
+        proxy_pass http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host \$host;
+        proxy_cache_bypass \$http_upgrade;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    }
+}
+EOF"
+
+# Habilitar sitio
+ssh_exec "sudo ln -sf /etc/nginx/sites-available/inventario /etc/nginx/sites-enabled/"
+ssh_exec "sudo rm -f /etc/nginx/sites-enabled/default"
+
+# Verificar y recargar Nginx
+ssh_exec "sudo nginx -t && sudo systemctl reload nginx"
+
+echo "✅ Despliegue completado exitosamente!"
+echo "🌍 La aplicación está disponible en: http://$(echo $SERVER | cut -d'@' -f2 | cut -d':' -f1)"
+
