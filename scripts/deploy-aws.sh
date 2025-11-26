@@ -23,12 +23,12 @@ fi
 
 # Función para ejecutar comandos remotos
 ssh_exec() {
-    ssh -i "$PEM_FILE" -o StrictHostKeyChecking=no "$SERVER" "$1"
+    ssh -i "$PEM_FILE" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConfigFile=/dev/null "$SERVER" "$1"
 }
 
 # Función para copiar archivos
 scp_copy() {
-    scp -i "$PEM_FILE" -r -o StrictHostKeyChecking=no "$1" "$SERVER:$2"
+    scp -i "$PEM_FILE" -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConfigFile=/dev/null "$1" "$SERVER:$2"
 }
 
 echo "📦 Instalando dependencias del sistema..."
