@@ -24,7 +24,8 @@ git commit -m "$COMMIT_MESSAGE"
 
 # Hacer push al remoto
 echo "🚀 Haciendo push a GitHub..."
-git push origin main || git push origin master
+CURRENT_BRANCH=$(git branch --show-current)
+git push origin $CURRENT_BRANCH
 
 echo "✅ Push completado exitosamente"
 
