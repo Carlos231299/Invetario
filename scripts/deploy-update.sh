@@ -38,6 +38,10 @@ echo "🔍 Verificando MySQL..."
 ssh_exec "sudo systemctl start mysql 2>/dev/null || true"
 ssh_exec "sleep 1"
 
+# Insertar datos de ejemplo si no existen
+echo "  - Verificando datos de ejemplo..."
+ssh_exec "cd $APP_DIR/backend && sudo mysql inventario_ferreteria_bastidas -e 'SELECT COUNT(*) as count FROM products;' 2>/dev/null | grep -q '0' && sudo mysql inventario_ferreteria_bastidas < src/database/seed-data.sql 2>/dev/null || echo 'Datos ya existen'"
+
 # Verificar que el .env existe y tiene las variables necesarias
 echo "🔍 Verificando configuración..."
 ssh_exec "cd $APP_DIR/backend && if [ ! -f .env ]; then
