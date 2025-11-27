@@ -118,6 +118,6 @@ CREATE TABLE IF NOT EXISTS movements (
 
 -- Insertar usuario administrador por defecto (password: admin123)
 INSERT INTO users (nombre, email, password, rol) VALUES 
-('Administrador', 'admin@ferreteria.com', '$2a$10$rOzJqZqZqZqZqZqZqZqZqOqZqZqZqZqZqZqZqZqZqZqZqZqZqZq', 'Admin')
+('Administrador', 'admin@ferreteria.com', '$2a$10$wTpH8SoYJoCJsuIaqtszz.hKKhwaJa0lcG648i9GT5zjVqUmOWgbK', 'Admin')
 ON DUPLICATE KEY UPDATE nombre=nombre;
 

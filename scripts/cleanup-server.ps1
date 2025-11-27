@@ -39,3 +39,4 @@ ssh -i $PEM_KEY $EC2_HOST $cleanupCommands
 
 Write-Host "`nLimpieza del servidor completada!" -ForegroundColor Green
 
+
