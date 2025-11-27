@@ -63,4 +63,4 @@ try {
 Write-Host "Sincronizacion completa exitosa!" -ForegroundColor Green
 Write-Host ""
 Write-Host "La aplicacion esta disponible en:" -ForegroundColor Cyan
-Write-Host "http://ec2-54-177-248-234.us-west-1.compute.amazonaws.com" -ForegroundColor White
+Write-Host "http://ec2-54-193-89-101.us-west-1.compute.amazonaws.com" -ForegroundColor White

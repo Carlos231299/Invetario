@@ -4,10 +4,10 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 PEM_FILE="$PROJECT_ROOT/plataforma2.0.pem"
-SERVER="ubuntu@ec2-54-177-248-234.us-west-1.compute.amazonaws.com"
+SERVER="ubuntu@ec2-54-193-89-101.us-west-1.compute.amazonaws.com"
 APP_DIR="/var/www/inventario-ferreteria-bastidas"
 GIT_REPO="https://github.com/Carlos231299/Invetario.git"
-SERVER_URL="http://ec2-54-177-248-234.us-west-1.compute.amazonaws.com"
+SERVER_URL="http://ec2-54-193-89-101.us-west-1.compute.amazonaws.com"
 
 if [ ! -f "$PEM_FILE" ]; then
     echo "❌ Error: No se encuentra el archivo $PEM_FILE"
@@ -15,7 +15,25 @@ if [ ! -f "$PEM_FILE" ]; then
 fi
 
 ssh_exec() {
-    ssh -i "$PEM_FILE" -F /dev/null -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$SERVER" "$1"
+    SSH_CONFIG_BACKUP=""
+    if [ -f ~/.ssh/config ]; then
+        SSH_CONFIG_BACKUP=~/.ssh/config.backup.$$
+        cp ~/.ssh/config "$SSH_CONFIG_BACKUP" 2>/dev/null || true
+        rm -f ~/.ssh/config 2>/dev/null || true
+    fi
+    
+    ssh -i "$PEM_FILE" \
+        -F /dev/null \
+        -o StrictHostKeyChecking=no \
+        -o UserKnownHostsFile=/dev/null \
+        -o ConnectTimeout=30 \
+        -o ServerAliveInterval=60 \
+        -o ServerAliveCountMax=3 \
+        "$SERVER" "$1"
+    
+    if [ -n "$SSH_CONFIG_BACKUP" ] && [ -f "$SSH_CONFIG_BACKUP" ]; then
+        mv "$SSH_CONFIG_BACKUP" ~/.ssh/config 2>/dev/null || true
+    fi
 }
 
 echo "🚀 Despliegue rápido iniciado..."
