@@ -1,4 +1,5 @@
 import { sendEmail } from '../config/email.js';
+import crypto from 'crypto';
 
 export const sendPasswordResetCode = async (email, resetCode, nombreUsuario = 'Usuario') => {
   const html = `
@@ -56,7 +57,6 @@ export const generateResetCode = () => {
 
 export const generateResetToken = () => {
   // Genera un token seguro de 32 caracteres hexadecimales
-  const crypto = require('crypto');
   return crypto.randomBytes(32).toString('hex');
 };
 

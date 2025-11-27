@@ -12,9 +12,18 @@ export class Supplier {
   }
 
   static async findAll() {
-    const query = 'SELECT * FROM suppliers ORDER BY nombre';
+    const query = 'SELECT DISTINCT * FROM suppliers ORDER BY nombre';
     const [rows] = await pool.execute(query);
-    return rows;
+    // Asegurar que no haya duplicados por ID
+    const uniqueSuppliers = [];
+    const seenIds = new Set();
+    for (const supplier of rows) {
+      if (!seenIds.has(supplier.id)) {
+        seenIds.add(supplier.id);
+        uniqueSuppliers.push(supplier);
+      }
+    }
+    return uniqueSuppliers;
   }
 
   static async findById(id) {

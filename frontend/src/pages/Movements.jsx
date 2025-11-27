@@ -16,10 +16,19 @@ const Movements = () => {
 
   const loadMovements = async () => {
     try {
+      setLoading(true);
+      setError(null);
       const response = await movementService.getAll();
-      setMovements(response.data.data);
+      
+      if (response?.data?.success && response.data.data) {
+        setMovements(Array.isArray(response.data.data) ? response.data.data : []);
+      } else {
+        setMovements([]);
+      }
     } catch (err) {
-      setError('Error al cargar movimientos');
+      console.error('Error al cargar movimientos:', err);
+      setError(err.response?.data?.message || 'Error al cargar movimientos. Por favor, intenta nuevamente.');
+      setMovements([]);
     } finally {
       setLoading(false);
     }

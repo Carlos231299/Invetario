@@ -29,14 +29,31 @@ const Exits = () => {
 
   const loadData = async () => {
     try {
+      setLoading(true);
       const [exitsRes, productsRes] = await Promise.all([
         exitService.getAll(),
         productService.getAll()
       ]);
-      setExits(exitsRes.data.data);
-      setProducts(productsRes.data.data);
+      
+      if (exitsRes?.data?.success && exitsRes.data.data) {
+        setExits(Array.isArray(exitsRes.data.data) ? exitsRes.data.data : []);
+      } else {
+        setExits([]);
+      }
+      
+      if (productsRes?.data?.success && productsRes.data.data) {
+        setProducts(Array.isArray(productsRes.data.data) ? productsRes.data.data : []);
+      } else {
+        setProducts([]);
+      }
     } catch (error) {
-      setAlert({ type: 'error', message: 'Error al cargar datos' });
+      console.error('Error al cargar datos:', error);
+      setAlert({ 
+        type: 'error', 
+        message: error.response?.data?.message || 'Error al cargar datos. Por favor, intenta nuevamente.' 
+      });
+      setExits([]);
+      setProducts([]);
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuth } from './hooks/useAuth.js';
+import { useSessionTimeout } from './hooks/useSessionTimeout.js';
 import Header from './components/Header.jsx';
 import Sidebar from './components/Sidebar.jsx';
 import Footer from './components/Footer.jsx';
@@ -31,6 +32,9 @@ const PrivateRoute = ({ children }) => {
 
 const AppContent = () => {
   const { isAuthenticated, loading } = useAuth();
+  
+  // Activar timeout de sesión
+  useSessionTimeout();
 
   if (loading) {
     return <Loading />;
