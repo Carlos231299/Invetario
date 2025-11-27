@@ -38,9 +38,21 @@ ssh_exec() {
 
 echo "🚀 Despliegue rápido iniciado..."
 
-# Verificar git
-echo "📥 Verificando Git..."
-ssh_exec "command -v git >/dev/null 2>&1 || { echo 'Instalando Git...'; sudo apt-get update && sudo apt-get install -y git; }"
+# Instalar dependencias del sistema
+echo "📦 Instalando dependencias del sistema..."
+ssh_exec "sudo apt-get update && sudo apt-get install -y git curl mysql-server nginx"
+
+# Instalar Node.js 20.x
+echo "📦 Instalando Node.js..."
+ssh_exec "command -v node >/dev/null 2>&1 || { curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - && sudo apt-get install -y nodejs; }"
+
+# Instalar PM2 globalmente
+echo "📦 Instalando PM2..."
+ssh_exec "command -v pm2 >/dev/null 2>&1 || { sudo npm install -g pm2; }"
+
+# Verificar instalaciones
+echo "✅ Verificando instalaciones..."
+ssh_exec "node --version && npm --version && pm2 --version"
 
 # Clonar desde GitHub
 echo "📥 Clonando repositorio..."
@@ -51,13 +63,33 @@ echo "🔧 Configurando aplicación..."
 
 # Base de datos primero
 echo "  - Configurando base de datos..."
+ssh_exec "sudo systemctl start mysql 2>/dev/null || true"
+ssh_exec "sudo systemctl enable mysql 2>/dev/null || true"
 ssh_exec "sudo mysql -e 'CREATE DATABASE IF NOT EXISTS inventario_ferreteria_bastidas;' 2>/dev/null || true"
 
 # Backend
 echo "  - Instalando dependencias del backend..."
 ssh_exec "cd $APP_DIR/backend && npm install --production"
 ssh_exec "cd $APP_DIR/backend && cp .env.example .env 2>/dev/null || true"
-ssh_exec "cd $APP_DIR/backend && sed -i 's|FRONTEND_URL=.*|FRONTEND_URL=$SERVER_URL|' .env"
+ssh_exec "cd $APP_DIR/backend && cat > .env <<EOF
+PORT=5000
+NODE_ENV=production
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=inventario_ferreteria_bastidas
+JWT_SECRET=\$(openssl rand -base64 32)
+JWT_REFRESH_SECRET=\$(openssl rand -base64 32)
+JWT_EXPIRES_IN=24h
+JWT_REFRESH_EXPIRES_IN=7d
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=cbastidas52@gmail.com
+EMAIL_PASS=ujqs qsdi bcma zzqj
+EMAIL_FROM=cbastidas52@gmail.com
+FRONTEND_URL=$SERVER_URL
+EOF"
 
 # Frontend
 echo "  - Instalando dependencias del frontend..."
@@ -82,6 +114,9 @@ ssh_exec "cd $APP_DIR/frontend && VITE_API_URL=$SERVER_URL/api npm run build"
 ssh_exec "sudo rm -rf /var/www/html/inventario && sudo mkdir -p /var/www/html/inventario && sudo cp -r $APP_DIR/frontend/dist/* /var/www/html/inventario/ && sudo chown -R www-data:www-data /var/www/html/inventario"
 
 # Configurar Nginx
+echo "  - Configurando Nginx..."
+ssh_exec "sudo systemctl start nginx 2>/dev/null || true"
+ssh_exec "sudo systemctl enable nginx 2>/dev/null || true"
 ssh_exec "sudo tee /etc/nginx/sites-available/inventario > /dev/null <<'EOF'
 server {
     listen 80;
