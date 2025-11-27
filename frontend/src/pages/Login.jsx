@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth.js';
 import { useForm } from '../hooks/useForm.js';
 import Button from '../components/Button.jsx';
 import Input from '../components/Input.jsx';
+import PasswordInput from '../components/PasswordInput.jsx';
 import Alert from '../components/Alert.jsx';
 
 const Login = () => {
@@ -27,7 +28,10 @@ const Login = () => {
         setAlert({ type: 'error', message: result.message || 'Error al iniciar sesión' });
       }
     } catch (error) {
-      setAlert({ type: 'error', message: 'Error al conectar con el servidor' });
+      setAlert({ 
+        type: 'error', 
+        message: error.message || 'Error al conectar con el servidor. Verifica tu conexión a internet.' 
+      });
     } finally {
       setLoading(false);
     }
@@ -62,10 +66,9 @@ const Login = () => {
               error={errors.email}
               required
             />
-            <Input
+            <PasswordInput
               label="Contraseña"
               name="password"
-              type="password"
               value={values.password}
               onChange={handleChange}
               error={errors.password}

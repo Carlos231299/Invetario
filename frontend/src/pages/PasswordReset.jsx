@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService.js';
 import Button from '../components/Button.jsx';
 import Input from '../components/Input.jsx';
+import PasswordInput from '../components/PasswordInput.jsx';
 import Alert from '../components/Alert.jsx';
 import { useForm } from '../hooks/useForm.js';
 
@@ -98,18 +99,16 @@ const PasswordReset = () => {
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleResetPassword}>
           {alert && <Alert type={alert.type} message={alert.message} onClose={() => setAlert(null)} />}
-          <Input
+          <PasswordInput
             label="Nueva Contraseña"
             name="password"
-            type="password"
             value={values.password}
             onChange={handleChange}
             required
           />
-          <Input
+          <PasswordInput
             label="Confirmar Contraseña"
             name="confirmPassword"
-            type="password"
             value={values.confirmPassword}
             onChange={handleChange}
             required
