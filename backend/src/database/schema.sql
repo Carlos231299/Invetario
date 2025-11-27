@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS users (
   activo BOOLEAN DEFAULT TRUE,
   reset_token VARCHAR(255) NULL,
   reset_token_expires DATETIME NULL,
+  reset_code VARCHAR(6) NULL,
+  reset_code_expires DATETIME NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_email (email),

@@ -57,7 +57,7 @@ export class User {
   }
 
   static async setResetCode(email, code, expires) {
-    const query = 'UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE email = ?';
+    const query = 'UPDATE users SET reset_code = ?, reset_code_expires = ? WHERE email = ?';
     await pool.execute(query, [code, expires, email]);
     return true;
   }
@@ -69,7 +69,7 @@ export class User {
   }
 
   static async verifyResetCode(email, code) {
-    const query = 'SELECT * FROM users WHERE email = ? AND reset_token = ? AND reset_token_expires > NOW()';
+    const query = 'SELECT * FROM users WHERE email = ? AND reset_code = ? AND reset_code_expires > NOW()';
     const [rows] = await pool.execute(query, [email, code]);
     return rows.length > 0;
   }
@@ -81,7 +81,7 @@ export class User {
   }
 
   static async clearResetCode(id) {
-    const query = 'UPDATE users SET reset_token = NULL, reset_token_expires = NULL WHERE id = ?';
+    const query = 'UPDATE users SET reset_code = NULL, reset_code_expires = NULL WHERE id = ?';
     await pool.execute(query, [id]);
     return true;
   }
