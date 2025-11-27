@@ -70,7 +70,7 @@ export const deleteUser = async (req, res, next) => {
     const { id } = req.params;
     
     if (id === req.user.id) {
-      throw new AppError('No puedes eliminar tu propio usuario', 400);
+      throw new AppError('No puedes desactivar tu propio usuario', 400);
     }
 
     const user = await User.findById(id);
@@ -78,11 +78,19 @@ export const deleteUser = async (req, res, next) => {
       throw new AppError('Usuario no encontrado', 404);
     }
 
-    // En lugar de eliminar, desactivamos
-    await User.update(id, { ...user, activo: false });
+    // Alternar estado: si está activo, desactivar; si está inactivo, activar
+    const nuevoEstado = !user.activo;
+    await User.update(id, { 
+      nombre: user.nombre, 
+      email: user.email, 
+      rol: user.rol, 
+      activo: nuevoEstado 
+    });
+    
     res.json({
       success: true,
-      message: 'Usuario desactivado correctamente'
+      message: nuevoEstado ? 'Usuario activado correctamente' : 'Usuario desactivado correctamente',
+      data: { activo: nuevoEstado }
     });
   } catch (error) {
     next(error);

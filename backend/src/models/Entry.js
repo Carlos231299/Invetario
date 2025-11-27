@@ -14,7 +14,14 @@ export class Entry {
         INSERT INTO entries (producto_id, cantidad, usuario_id, observaciones)
         VALUES (?, ?, ?, ?)
       `;
-      const [result] = await connection.execute(query, [producto_id, cantidad, usuario_id, observaciones]);
+      // Asegurar que los valores sean del tipo correcto
+      const params = [
+        parseInt(producto_id),
+        parseInt(cantidad),
+        parseInt(usuario_id),
+        observaciones || null
+      ];
+      const [result] = await connection.execute(query, params);
 
       // Actualizar stock del producto
       await connection.execute(

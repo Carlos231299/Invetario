@@ -6,9 +6,18 @@ export const logMovement = async (tipo, productoId, cantidad, usuarioId, detalle
       INSERT INTO movements (tipo, producto_id, cantidad, fecha, usuario_id, detalle)
       VALUES (?, ?, ?, NOW(), ?, ?)
     `;
-    await pool.execute(query, [tipo, productoId, cantidad, usuarioId, detalle]);
+    // Asegurar que los valores sean del tipo correcto
+    const params = [
+      tipo || null,
+      productoId ? parseInt(productoId) : null,
+      cantidad ? parseInt(cantidad) : null,
+      usuarioId ? parseInt(usuarioId) : null,
+      detalle || null
+    ];
+    await pool.execute(query, params);
   } catch (error) {
     console.error('Error al registrar movimiento en bitácora:', error);
+    throw error; // Re-lanzar para que se maneje en el nivel superior
   }
 };
 

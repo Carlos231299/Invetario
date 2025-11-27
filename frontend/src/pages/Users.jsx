@@ -72,14 +72,21 @@ const Users = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('¿Estás seguro de desactivar este usuario?')) return;
+  const handleToggleStatus = async (user) => {
+    const action = user.activo ? 'desactivar' : 'activar';
+    if (!window.confirm(`¿Estás seguro de ${action} este usuario?`)) return;
     try {
-      await userService.delete(id);
-      setAlert({ type: 'success', message: 'Usuario desactivado correctamente' });
+      const response = await userService.delete(user.id);
+      setAlert({ 
+        type: 'success', 
+        message: response.data?.message || `Usuario ${action}do correctamente` 
+      });
       loadUsers();
     } catch (error) {
-      setAlert({ type: 'error', message: 'Error al desactivar usuario' });
+      setAlert({ 
+        type: 'error', 
+        message: error.response?.data?.message || `Error al ${action} usuario` 
+      });
     }
   };
 
@@ -110,7 +117,12 @@ const Users = () => {
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                 <Button variant="secondary" onClick={() => handleOpenModal(user)}>Editar</Button>
-                <Button variant="danger" onClick={() => handleDelete(user.id)}>Desactivar</Button>
+                <Button 
+                  variant={user.activo ? "danger" : "success"} 
+                  onClick={() => handleToggleStatus(user)}
+                >
+                  {user.activo ? 'Desactivar' : 'Activar'}
+                </Button>
               </td>
             </tr>
           )}
