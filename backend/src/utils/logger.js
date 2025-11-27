@@ -62,8 +62,8 @@ export const getMovements = async (filters = {}) => {
     }
 
     query += ' ORDER BY m.fecha DESC';
-    const limit = filters.limit || 50;
-    const offset = filters.offset || 0;
+    const limit = parseInt(filters.limit) || 50;
+    const offset = parseInt(filters.offset) || 0;
     query += ' LIMIT ? OFFSET ?';
     params.push(limit, offset);
 

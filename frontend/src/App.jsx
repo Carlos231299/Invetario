@@ -56,7 +56,7 @@ const AppContent = () => {
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50" style={{ paddingBottom: '280px' }}>
           <Routes>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/products" element={<Products />} />
@@ -68,8 +68,8 @@ const AppContent = () => {
             <Route path="/users" element={<Users />} />
             <Route path="*" element={<Navigate to="/dashboard" />} />
           </Routes>
-          <Footer />
         </main>
+        <Footer />
       </div>
     </div>
   );

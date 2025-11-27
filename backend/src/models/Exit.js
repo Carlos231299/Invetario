@@ -83,8 +83,8 @@ export class Exit {
     }
 
     query += ' ORDER BY e.fecha DESC LIMIT ? OFFSET ?';
-    const limit = filters.limit || 50;
-    const offset = filters.offset || 0;
+    const limit = parseInt(filters.limit) || 50;
+    const offset = parseInt(filters.offset) || 0;
     params.push(limit, offset);
 
     const [rows] = await pool.execute(query, params);

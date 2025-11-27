@@ -57,10 +57,18 @@ const Header = () => {
                   <p className="text-xs text-gray-500">{user?.rol}</p>
                 </div>
               </div>
-              <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+              <button 
+                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                onClick={() => alert('Funcionalidad de notificaciones próximamente')}
+                title="Notificaciones"
+              >
                 <BellIcon className="h-5 w-5" />
               </button>
-              <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+              <button 
+                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                onClick={() => alert('Funcionalidad de configuración próximamente')}
+                title="Configuración"
+              >
                 <Cog6ToothIcon className="h-5 w-5" />
               </button>
               <Button 
