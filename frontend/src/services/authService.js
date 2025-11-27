@@ -64,9 +64,27 @@ export const authService = {
     }
   },
 
-  resetPassword: async (token, password) => {
+  verifyCode: async (email, code) => {
     try {
-      const response = await api.post('/auth/reset-password', { token, password });
+      const response = await api.post('/auth/verify-code', { email, code });
+      return response.data;
+    } catch (error) {
+      if (error.code === 'ERR_NETWORK' || error.message.includes('Network Error')) {
+        return {
+          success: false,
+          message: 'Error de conexión. Verifica que el servidor esté disponible.'
+        };
+      }
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Error al verificar código'
+      };
+    }
+  },
+
+  resetPassword: async (email, code, password) => {
+    try {
+      const response = await api.post('/auth/reset-password', { email, code, password });
       return response.data;
     } catch (error) {
       if (error.code === 'ERR_NETWORK' || error.message.includes('Network Error')) {

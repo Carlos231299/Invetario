@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService.js';
 import Button from '../components/Button.jsx';
 import Input from '../components/Input.jsx';
@@ -8,13 +8,11 @@ import Alert from '../components/Alert.jsx';
 import { useForm } from '../hooks/useForm.js';
 
 const PasswordReset = () => {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const token = searchParams.get('token');
-  const [step, setStep] = useState(token ? 'reset' : 'request');
+  const [step, setStep] = useState('request'); // request -> verify -> reset
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState(null);
-  const { values, handleChange, reset } = useForm({ email: '', password: '', confirmPassword: '' });
+  const { values, handleChange, reset } = useForm({ email: '', code: '', password: '', confirmPassword: '' });
 
   const handleRequestReset = async (e) => {
     e.preventDefault();
@@ -23,9 +21,39 @@ const PasswordReset = () => {
 
     try {
       const result = await authService.forgotPassword(values.email);
-      setAlert({ type: 'success', message: result.message || 'Si el email existe, se enviará un enlace de recuperación' });
+      if (result.success) {
+        setAlert({ type: 'success', message: result.message || 'Código enviado a tu correo electrónico' });
+        setStep('verify');
+      } else {
+        setAlert({ type: 'error', message: result.message || 'Error al solicitar recuperación' });
+      }
     } catch (error) {
       setAlert({ type: 'error', message: 'Error al solicitar recuperación' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async (e) => {
+    e.preventDefault();
+    if (values.code.length !== 6) {
+      setAlert({ type: 'error', message: 'El código debe tener 6 dígitos' });
+      return;
+    }
+
+    setLoading(true);
+    setAlert(null);
+
+    try {
+      const result = await authService.verifyCode(values.email, values.code);
+      if (result.success) {
+        setAlert({ type: 'success', message: 'Código verificado correctamente' });
+        setStep('reset');
+      } else {
+        setAlert({ type: 'error', message: result.message || 'Código inválido' });
+      }
+    } catch (error) {
+      setAlert({ type: 'error', message: 'Error al verificar código' });
     } finally {
       setLoading(false);
     }
@@ -38,11 +66,16 @@ const PasswordReset = () => {
       return;
     }
 
+    if (values.password.length < 6) {
+      setAlert({ type: 'error', message: 'La contraseña debe tener al menos 6 caracteres' });
+      return;
+    }
+
     setLoading(true);
     setAlert(null);
 
     try {
-      const result = await authService.resetPassword(token, values.password);
+      const result = await authService.resetPassword(values.email, values.code, values.password);
       if (result.success) {
         setAlert({ type: 'success', message: 'Contraseña restablecida correctamente' });
         setTimeout(() => navigate('/login'), 2000);
@@ -64,6 +97,9 @@ const PasswordReset = () => {
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
               Recuperar Contraseña
             </h2>
+            <p className="mt-2 text-center text-sm text-gray-600">
+              Ingresa tu correo electrónico para recibir un código de recuperación
+            </p>
           </div>
           <form className="mt-8 space-y-6" onSubmit={handleRequestReset}>
             {alert && <Alert type={alert.type} message={alert.message} onClose={() => setAlert(null)} />}
@@ -74,14 +110,66 @@ const PasswordReset = () => {
               value={values.email}
               onChange={handleChange}
               required
+              disabled={loading}
             />
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Enviando...' : 'Enviar Enlace de Recuperación'}
+              {loading ? 'Enviando...' : 'Enviar Código de Recuperación'}
             </Button>
             <div className="text-center">
               <a href="/login" className="text-sm text-blue-600 hover:text-blue-500">
                 Volver al login
               </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 'verify') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
+        <div className="max-w-md w-full space-y-8">
+          <div>
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+              Verificar Código
+            </h2>
+            <p className="mt-2 text-center text-sm text-gray-600">
+              Ingresa el código de 6 dígitos enviado a {values.email}
+            </p>
+          </div>
+          <form className="mt-8 space-y-6" onSubmit={handleVerifyCode}>
+            {alert && <Alert type={alert.type} message={alert.message} onClose={() => setAlert(null)} />}
+            <Input
+              label="Código de Verificación"
+              name="code"
+              type="text"
+              value={values.code}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                handleChange({ target: { name: 'code', value } });
+              }}
+              placeholder="000000"
+              maxLength="6"
+              required
+              disabled={loading}
+              className="text-center text-2xl tracking-widest font-mono"
+            />
+            <Button type="submit" className="w-full" disabled={loading || values.code.length !== 6}>
+              {loading ? 'Verificando...' : 'Verificar Código'}
+            </Button>
+            <div className="text-center space-y-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setStep('request');
+                  reset();
+                  setAlert(null);
+                }}
+                className="text-sm text-blue-600 hover:text-blue-500"
+              >
+                Cambiar correo electrónico
+              </button>
             </div>
           </form>
         </div>
@@ -105,6 +193,7 @@ const PasswordReset = () => {
             value={values.password}
             onChange={handleChange}
             required
+            disabled={loading}
           />
           <PasswordInput
             label="Confirmar Contraseña"
@@ -112,6 +201,7 @@ const PasswordReset = () => {
             value={values.confirmPassword}
             onChange={handleChange}
             required
+            disabled={loading}
           />
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? 'Restableciendo...' : 'Restablecer Contraseña'}

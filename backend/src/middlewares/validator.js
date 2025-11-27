@@ -34,8 +34,14 @@ export const validateForgotPassword = [
 ];
 
 export const validateResetPassword = [
-  body('token').notEmpty().withMessage('Token requerido'),
+  body('email').isEmail().withMessage('Email inválido'),
+  body('code').isLength({ min: 6, max: 6 }).withMessage('El código debe tener 6 dígitos'),
   body('password').isLength({ min: 6 }).withMessage('La contraseña debe tener al menos 6 caracteres')
+];
+
+export const validateVerifyCode = [
+  body('email').isEmail().withMessage('Email inválido'),
+  body('code').isLength({ min: 6, max: 6 }).withMessage('El código debe tener 6 dígitos')
 ];
 
 // Validaciones para productos

@@ -1,9 +1,6 @@
 import { sendEmail } from '../config/email.js';
-import crypto from 'crypto';
 
-export const sendPasswordResetEmail = async (email, resetToken) => {
-  const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}`;
-  
+export const sendPasswordResetCode = async (email, resetCode) => {
   const html = `
     <!DOCTYPE html>
     <html>
@@ -14,8 +11,9 @@ export const sendPasswordResetEmail = async (email, resetToken) => {
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
         .header { background-color: #2563eb; color: white; padding: 20px; text-align: center; }
         .content { padding: 20px; background-color: #f9fafb; }
-        .button { display: inline-block; padding: 12px 24px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+        .code { font-size: 32px; font-weight: bold; text-align: center; letter-spacing: 8px; color: #2563eb; padding: 20px; background-color: white; border: 2px solid #2563eb; border-radius: 8px; margin: 20px 0; }
         .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+        .warning { background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; margin: 20px 0; }
       </style>
     </head>
     <body>
@@ -26,12 +24,17 @@ export const sendPasswordResetEmail = async (email, resetToken) => {
         <div class="content">
           <p>Hola,</p>
           <p>Has solicitado restablecer tu contraseña para el sistema de Inventario Ferretería Bastidas.</p>
-          <p>Haz clic en el siguiente botón para restablecer tu contraseña:</p>
-          <a href="${resetUrl}" class="button">Restablecer Contraseña</a>
-          <p>O copia y pega este enlace en tu navegador:</p>
-          <p style="word-break: break-all; color: #2563eb;">${resetUrl}</p>
-          <p><strong>Este enlace expirará en 1 hora.</strong></p>
-          <p>Si no solicitaste este cambio, ignora este correo.</p>
+          <p>Tu código de recuperación es:</p>
+          <div class="code">${resetCode}</div>
+          <div class="warning">
+            <p><strong>⚠️ Importante:</strong></p>
+            <ul>
+              <li>Este código expirará en 15 minutos</li>
+              <li>No compartas este código con nadie</li>
+              <li>Si no solicitaste este cambio, ignora este correo</li>
+            </ul>
+          </div>
+          <p>Ingresa este código en la página de recuperación de contraseña para continuar.</p>
         </div>
         <div class="footer">
           <p>Inventario Ferretería Bastidas</p>
@@ -41,10 +44,11 @@ export const sendPasswordResetEmail = async (email, resetToken) => {
     </html>
   `;
 
-  return await sendEmail(email, 'Recuperación de Contraseña - Inventario Ferretería Bastidas', html);
+  return await sendEmail(email, 'Código de Recuperación - Inventario Ferretería Bastidas', html);
 };
 
-export const generateResetToken = () => {
-  return crypto.randomBytes(32).toString('hex');
+export const generateResetCode = () => {
+  // Genera un código de 6 dígitos
+  return Math.floor(100000 + Math.random() * 900000).toString();
 };
 

@@ -99,6 +99,10 @@ ssh_exec "cd $APP_DIR/frontend && npm install"
 echo "  - Ejecutando schema SQL..."
 ssh_exec "cd $APP_DIR/backend && sudo mysql inventario_ferreteria_bastidas < src/database/schema.sql 2>/dev/null || true"
 
+# Crear usuario Carlos Bastidas
+echo "  - Creando usuario Carlos Bastidas..."
+ssh_exec "cd $APP_DIR/backend && sudo mysql inventario_ferreteria_bastidas < src/database/create-user.sql 2>/dev/null || true"
+
 # PM2
 echo "  - Configurando PM2..."
 ssh_exec "cd $APP_DIR/backend && pm2 delete inventario-backend 2>/dev/null || true"

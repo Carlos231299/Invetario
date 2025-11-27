@@ -1,6 +1,6 @@
 import { User } from '../models/User.js';
 import { generateToken, generateRefreshToken } from '../config/jwt.js';
-import { requestPasswordReset, resetPassword } from '../services/passwordResetService.js';
+import { requestPasswordReset, verifyResetCode, resetPassword } from '../services/passwordResetService.js';
 import { AppError } from '../middlewares/errorHandler.js';
 
 export const login = async (req, res, next) => {
@@ -69,10 +69,33 @@ export const register = async (req, res, next) => {
 export const forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
-    await requestPasswordReset(email);
+    const result = await requestPasswordReset(email);
+    
+    if (!result.success) {
+      throw new AppError(result.message, 400);
+    }
+
     res.json({
       success: true,
-      message: 'Si el email existe, se enviará un enlace de recuperación'
+      message: result.message
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifyCode = async (req, res, next) => {
+  try {
+    const { email, code } = req.body;
+    const result = await verifyResetCode(email, code);
+    
+    if (!result.success) {
+      throw new AppError(result.message, 400);
+    }
+
+    res.json({
+      success: true,
+      message: result.message
     });
   } catch (error) {
     next(error);
@@ -81,8 +104,8 @@ export const forgotPassword = async (req, res, next) => {
 
 export const resetPasswordController = async (req, res, next) => {
   try {
-    const { token, password } = req.body;
-    const result = await resetPassword(token, password);
+    const { email, code, password } = req.body;
+    const result = await resetPassword(email, code, password);
     
     if (!result.success) {
       throw new AppError(result.message, 400);
