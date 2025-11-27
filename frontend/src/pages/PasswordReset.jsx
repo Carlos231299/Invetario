@@ -50,8 +50,20 @@ const PasswordReset = () => {
 
   const handleVerifyCode = async (e) => {
     e.preventDefault();
+    
+    if (!values.email || !values.email.trim()) {
+      setAlert({ type: 'error', message: 'El correo electrónico es requerido' });
+      return;
+    }
+
     if (values.code.length !== 6) {
-      setAlert({ type: 'error', message: 'El código debe tener 6 dígitos' });
+      setAlert({ type: 'error', message: 'El código debe tener exactamente 6 dígitos' });
+      return;
+    }
+
+    // Validar que el código solo contenga dígitos
+    if (!/^\d{6}$/.test(values.code)) {
+      setAlert({ type: 'error', message: 'El código solo debe contener números' });
       return;
     }
 
@@ -59,19 +71,20 @@ const PasswordReset = () => {
     setAlert(null);
 
     try {
-      const result = await authService.verifyCode(values.email, values.code);
+      const result = await authService.verifyCode(values.email.trim(), values.code);
       if (result.success) {
         setAlert({ 
           type: 'success', 
-          message: 'Código verificado correctamente. Revisa tu correo electrónico para recibir el enlace de recuperación.' 
+          message: result.message || 'Código verificado correctamente. Revisa tu correo electrónico para recibir el enlace de recuperación.' 
         });
         // Esperar a que el usuario reciba el link
         setStep('waiting-link');
       } else {
-        setAlert({ type: 'error', message: result.message || 'Código inválido' });
+        setAlert({ type: 'error', message: result.message || 'Código inválido o expirado. Por favor, verifica el código e intenta nuevamente.' });
       }
     } catch (error) {
-      setAlert({ type: 'error', message: 'Error al verificar código' });
+      console.error('Error en verifyCode:', error);
+      setAlert({ type: 'error', message: error.message || 'Error al verificar código. Por favor, intenta nuevamente.' });
     } finally {
       setLoading(false);
     }
@@ -79,6 +92,12 @@ const PasswordReset = () => {
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
+    
+    if (!values.password || !values.password.trim()) {
+      setAlert({ type: 'error', message: 'Por favor, ingresa una nueva contraseña' });
+      return;
+    }
+
     if (values.password !== values.confirmPassword) {
       setAlert({ type: 'error', message: 'Las contraseñas no coinciden' });
       return;
@@ -98,7 +117,7 @@ const PasswordReset = () => {
 
     try {
       if (!token) {
-        setAlert({ type: 'error', message: 'Token no válido. Por favor, usa el enlace enviado a tu correo.' });
+        setAlert({ type: 'error', message: 'Token no válido. Por favor, usa el enlace enviado a tu correo electrónico.' });
         setLoading(false);
         return;
       }
@@ -107,13 +126,14 @@ const PasswordReset = () => {
       const result = await authService.resetPasswordByToken(token, values.password);
       
       if (result.success) {
-        setAlert({ type: 'success', message: 'Contraseña restablecida correctamente' });
+        setAlert({ type: 'success', message: result.message || 'Contraseña restablecida correctamente' });
         setTimeout(() => navigate('/login'), 2000);
       } else {
-        setAlert({ type: 'error', message: result.message || 'Error al restablecer contraseña' });
+        setAlert({ type: 'error', message: result.message || 'Error al restablecer contraseña. El token puede haber expirado o ser inválido.' });
       }
     } catch (error) {
-      setAlert({ type: 'error', message: 'Error al restablecer contraseña' });
+      console.error('Error en resetPassword:', error);
+      setAlert({ type: 'error', message: error.message || 'Error al restablecer contraseña. Por favor, intenta nuevamente o solicita un nuevo enlace.' });
     } finally {
       setLoading(false);
     }

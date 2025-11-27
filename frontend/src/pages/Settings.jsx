@@ -14,7 +14,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 const Settings = () => {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const { theme, changeTheme } = useTheme();
   const [activeTab, setActiveTab] = useState('profile');
   const [alert, setAlert] = useState(null);
@@ -64,8 +64,16 @@ const Settings = () => {
     setAlert(null);
 
     try {
-      // Aquí iría la llamada al API
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulación
+      // Actualizar usuario en localStorage y contexto
+      const updatedUserData = {
+        nombre: formData.nombre,
+        avatar: formData.avatar
+      };
+      updateUser(updatedUserData);
+      
+      // Aquí iría la llamada al API para guardar en el backend
+      // await userService.update(user.id, updatedUserData);
+      
       setAlert({ type: 'success', message: 'Perfil actualizado correctamente' });
     } catch (error) {
       setAlert({ type: 'error', message: 'Error al actualizar perfil' });
@@ -213,7 +221,10 @@ const Settings = () => {
                               }
                               const reader = new FileReader();
                               reader.onloadend = () => {
-                                setFormData(prev => ({ ...prev, avatar: reader.result }));
+                                const avatarData = reader.result;
+                                setFormData(prev => ({ ...prev, avatar: avatarData }));
+                                // Actualizar inmediatamente en el contexto y localStorage
+                                updateUser({ avatar: avatarData });
                               };
                               reader.readAsDataURL(file);
                             }
@@ -230,7 +241,10 @@ const Settings = () => {
                         {formData.avatar && (
                           <button
                             type="button"
-                            onClick={() => setFormData(prev => ({ ...prev, avatar: null }))}
+                            onClick={() => {
+                              setFormData(prev => ({ ...prev, avatar: null }));
+                              updateUser({ avatar: null });
+                            }}
                             className="mt-2 text-sm text-red-600 hover:text-red-700 dark:text-red-400"
                           >
                             Eliminar foto
@@ -380,15 +394,15 @@ const Settings = () => {
                         const newTheme = e.target.value;
                         setFormData(prev => ({ ...prev, theme: newTheme }));
                         changeTheme(newTheme);
-                        setAlert({ type: 'success', message: 'Tema actualizado correctamente' });
                       }}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                     >
                       <option value="light">Claro</option>
                       <option value="dark">Oscuro</option>
+                      <option value="system">Definido por el sistema</option>
                     </select>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                      El tema se aplica inmediatamente y se guarda automáticamente.
+                      El tema se aplica inmediatamente al seleccionarlo. "Definido por el sistema" seguirá la preferencia de tu sistema operativo.
                     </p>
                   </div>
                   <div className="p-4 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg">

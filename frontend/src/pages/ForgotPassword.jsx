@@ -14,25 +14,47 @@ const ForgotPassword = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validación básica
+    if (!values.email || !values.email.trim()) {
+      setAlert({ type: 'error', message: 'Por favor, ingresa tu correo electrónico' });
+      return;
+    }
+
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(values.email.trim())) {
+      setAlert({ type: 'error', message: 'Por favor, ingresa un correo electrónico válido' });
+      return;
+    }
+
     setLoading(true);
     setAlert(null);
 
     try {
-      const result = await authService.forgotPassword(values.email);
-      if (result.success) {
+      const result = await authService.forgotPassword(values.email.trim());
+      
+      if (result && result.success) {
         setAlert({ 
           type: 'success', 
           message: result.message || 'Código de verificación enviado a tu correo electrónico'
         });
         // Redirigir a la página de verificación de código
         setTimeout(() => {
-          navigate(`/reset-password?email=${encodeURIComponent(values.email)}`);
+          navigate(`/reset-password?email=${encodeURIComponent(values.email.trim())}`);
         }, 1500);
       } else {
-        setAlert({ type: 'error', message: result.message || 'Error al solicitar recuperación' });
+        // Mostrar el mensaje de error del backend
+        const errorMessage = result?.message || 
+                            'Error al solicitar recuperación. Por favor, verifica tu correo e intenta nuevamente.';
+        setAlert({ type: 'error', message: errorMessage });
       }
     } catch (error) {
-      setAlert({ type: 'error', message: 'Error al solicitar recuperación' });
+      console.error('Error en forgotPassword:', error);
+      const errorMessage = error?.message || 
+                          error?.response?.data?.message ||
+                          'Error al solicitar recuperación. Por favor, verifica tu conexión e intenta nuevamente.';
+      setAlert({ type: 'error', message: errorMessage });
     } finally {
       setLoading(false);
     }

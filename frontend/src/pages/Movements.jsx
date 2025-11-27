@@ -20,14 +20,25 @@ const Movements = () => {
       setError(null);
       const response = await movementService.getAll();
       
-      if (response?.data?.success && response.data.data) {
-        setMovements(Array.isArray(response.data.data) ? response.data.data : []);
+      if (response?.data?.success) {
+        if (response.data.data && Array.isArray(response.data.data)) {
+          setMovements(response.data.data);
+        } else {
+          setMovements([]);
+          if (response.data.data && !Array.isArray(response.data.data)) {
+            console.warn('La respuesta de movimientos no es un array:', response.data.data);
+          }
+        }
       } else {
         setMovements([]);
+        setError(response?.data?.message || 'No se pudieron cargar los movimientos');
       }
     } catch (err) {
       console.error('Error al cargar movimientos:', err);
-      setError(err.response?.data?.message || 'Error al cargar movimientos. Por favor, intenta nuevamente.');
+      const errorMessage = err.response?.data?.message || 
+                          err.message || 
+                          'Error al cargar movimientos. Por favor, verifica tu conexión e intenta nuevamente.';
+      setError(errorMessage);
       setMovements([]);
     } finally {
       setLoading(false);
@@ -35,7 +46,23 @@ const Movements = () => {
   };
 
   if (loading) return <Loading />;
-  if (error) return <Alert type="error" message={error} />;
+  
+  if (error) {
+    return (
+      <div className="p-6">
+        <h1 className="text-2xl font-bold mb-6">Historial de Movimientos</h1>
+        <Alert type="error" message={error} />
+        <div className="mt-4">
+          <button
+            onClick={loadMovements}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">

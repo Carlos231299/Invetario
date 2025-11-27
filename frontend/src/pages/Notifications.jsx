@@ -14,8 +14,29 @@ const Notifications = () => {
   const [filter, setFilter] = useState('unread'); // all, unread, read
   const [expandedId, setExpandedId] = useState(null);
 
-  // Notificaciones de ejemplo (en producción vendrían del backend)
+  // Cargar notificaciones desde localStorage o inicializar con datos de ejemplo
   useEffect(() => {
+    const savedNotifications = localStorage.getItem('notifications');
+    if (savedNotifications) {
+      try {
+        const parsed = JSON.parse(savedNotifications);
+        // Convertir timestamps a objetos Date
+        const notificationsWithDates = parsed.map(n => ({
+          ...n,
+          timestamp: new Date(n.timestamp)
+        }));
+        setNotifications(notificationsWithDates);
+      } catch (error) {
+        console.error('Error al cargar notificaciones:', error);
+        initializeNotifications();
+      }
+    } else {
+      initializeNotifications();
+    }
+  }, []);
+
+  // Función para inicializar notificaciones de ejemplo
+  const initializeNotifications = () => {
     const mockNotifications = [
       {
         id: 1,
@@ -59,7 +80,17 @@ const Notifications = () => {
       }
     ];
     setNotifications(mockNotifications);
-  }, []);
+    saveNotificationsToStorage(mockNotifications);
+  };
+
+  // Guardar notificaciones en localStorage
+  const saveNotificationsToStorage = (notificationsToSave) => {
+    try {
+      localStorage.setItem('notifications', JSON.stringify(notificationsToSave));
+    } catch (error) {
+      console.error('Error al guardar notificaciones:', error);
+    }
+  };
 
   const getIcon = (type) => {
     switch (type) {
@@ -88,9 +119,11 @@ const Notifications = () => {
   };
 
   const markAsRead = (id) => {
-    setNotifications(notifications.map(n => 
+    const updatedNotifications = notifications.map(n => 
       n.id === id ? { ...n, read: true } : n
-    ));
+    );
+    setNotifications(updatedNotifications);
+    saveNotificationsToStorage(updatedNotifications);
     // Si el filtro es solo sin leer, cambiar a todas después de marcar como leída
     if (filter === 'unread') {
       setTimeout(() => setFilter('all'), 500);
@@ -98,13 +131,17 @@ const Notifications = () => {
   };
 
   const markAllAsRead = () => {
-    setNotifications(notifications.map(n => ({ ...n, read: true })));
+    const updatedNotifications = notifications.map(n => ({ ...n, read: true }));
+    setNotifications(updatedNotifications);
+    saveNotificationsToStorage(updatedNotifications);
     // Cambiar filtro a todas después de marcar todas como leídas
     setTimeout(() => setFilter('all'), 500);
   };
 
   const deleteNotification = (id) => {
-    setNotifications(notifications.filter(n => n.id !== id));
+    const updatedNotifications = notifications.filter(n => n.id !== id);
+    setNotifications(updatedNotifications);
+    saveNotificationsToStorage(updatedNotifications);
     if (expandedId === id) {
       setExpandedId(null);
     }

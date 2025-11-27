@@ -104,11 +104,22 @@ export const forgotPassword = async (req, res, next) => {
       throw new AppError('El formato del correo electrónico no es válido', 400);
     }
 
-    const result = await requestPasswordReset(email);
+    let result;
+    try {
+      result = await requestPasswordReset(email);
+    } catch (serviceError) {
+      console.error('Error en requestPasswordReset:', serviceError);
+      // Si el servicio lanza un error, capturarlo y devolver un mensaje apropiado
+      throw new AppError(
+        serviceError.message || 'Error al procesar la solicitud de recuperación. Por favor, intenta nuevamente.',
+        500
+      );
+    }
     
-    if (!result.success) {
+    if (!result || !result.success) {
       // El servicio ya proporciona mensajes descriptivos
-      throw new AppError(result.message, 400);
+      const errorMessage = result?.message || 'Error al procesar la solicitud. Por favor, intenta nuevamente.';
+      throw new AppError(errorMessage, result?.statusCode || 400);
     }
 
     res.json({
@@ -122,6 +133,7 @@ export const forgotPassword = async (req, res, next) => {
     }
     // Para otros errores, loggear y devolver mensaje genérico
     console.error('Error inesperado en forgotPassword:', error);
+    console.error('Stack trace:', error.stack);
     next(new AppError('Error inesperado al procesar la solicitud. Por favor, intenta nuevamente.', 500));
   }
 };

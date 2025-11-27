@@ -36,7 +36,7 @@ const Header = () => {
 
   return (
     <>
-      <header className="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50 backdrop-blur-sm bg-white/95">
+      <header className="bg-white dark:bg-gray-800 shadow-lg border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 backdrop-blur-sm bg-white/95 dark:bg-gray-800/95 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
@@ -45,8 +45,8 @@ const Header = () => {
                   <span className="text-white font-bold text-lg">IB</span>
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold text-gray-900">Ferretería Bastidas</h1>
-                  <p className="text-xs text-gray-500">{getPageTitle()}</p>
+                  <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">Ferretería Bastidas</h1>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{getPageTitle()}</p>
                 </div>
               </div>
             </div>
@@ -69,7 +69,7 @@ const Header = () => {
                 </div>
               </div>
               <button 
-                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors relative"
+                className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors relative"
                 onClick={() => navigate('/notifications')}
                 title="Notificaciones"
               >
@@ -77,7 +77,7 @@ const Header = () => {
                 <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
               </button>
               <button 
-                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                 onClick={() => navigate('/settings')}
                 title="Configuración"
               >

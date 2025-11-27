@@ -51,15 +51,23 @@ export const authService = {
       const response = await api.post('/auth/forgot-password', { email });
       return response.data;
     } catch (error) {
+      console.error('Error en forgotPassword:', error);
+      
       if (error.code === 'ERR_NETWORK' || error.message.includes('Network Error')) {
         return {
           success: false,
           message: 'Error de conexión. Verifica que el servidor esté disponible.'
         };
       }
+      
+      // Capturar mensaje del backend si existe
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          'Error al procesar la solicitud. Por favor, intenta nuevamente.';
+      
       return {
         success: false,
-        message: error.response?.data?.message || 'Error al solicitar recuperación de contraseña'
+        message: errorMessage
       };
     }
   },

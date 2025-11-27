@@ -49,19 +49,31 @@ export const requestPasswordReset = async (email) => {
       return { success: false, message: 'Error al procesar la solicitud. Por favor, intenta nuevamente.' };
     }
     
-    const emailResult = await sendPasswordResetCode(email, resetCode, user.nombre);
+    let emailResult;
+    try {
+      emailResult = await sendPasswordResetCode(email, resetCode, user.nombre);
+    } catch (emailError) {
+      console.error('Error al enviar email (excepción):', emailError);
+      return { 
+        success: false, 
+        message: 'Error al enviar el correo electrónico. Por favor, verifica la configuración del servidor o intenta nuevamente más tarde.' 
+      };
+    }
     
-    if (!emailResult.success) {
-      console.error('Error al enviar email:', emailResult.error);
+    if (!emailResult || !emailResult.success) {
+      console.error('Error al enviar email:', emailResult?.error);
       // Proporcionar mensaje más específico basado en el tipo de error
-      if (emailResult.error && emailResult.error.includes('autenticación')) {
+      const errorMsg = emailResult?.error || 'Error desconocido';
+      if (errorMsg.includes('autenticación') || errorMsg.includes('EAUTH')) {
         return { success: false, message: 'Error de configuración del servidor de correo. Contacta al administrador.' };
-      } else if (emailResult.error && emailResult.error.includes('conexión')) {
+      } else if (errorMsg.includes('conexión') || errorMsg.includes('ECONNECTION')) {
         return { success: false, message: 'Error de conexión con el servidor de correo. Por favor, intenta nuevamente más tarde.' };
-      } else if (emailResult.error && emailResult.error.includes('tiempo')) {
+      } else if (errorMsg.includes('tiempo') || errorMsg.includes('ETIMEDOUT')) {
         return { success: false, message: 'Tiempo de espera agotado al enviar el correo. Por favor, intenta nuevamente.' };
+      } else if (errorMsg.includes('incompleta')) {
+        return { success: false, message: 'Configuración de correo electrónico incompleta. Contacta al administrador.' };
       }
-      return { success: false, message: `Error al enviar el correo: ${emailResult.error || 'Error desconocido'}. Por favor, intenta nuevamente.` };
+      return { success: false, message: `Error al enviar el correo: ${errorMsg}. Por favor, intenta nuevamente.` };
     }
     
     return { success: true, message: 'Código de verificación enviado a tu correo electrónico' };

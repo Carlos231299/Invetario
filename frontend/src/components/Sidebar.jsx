@@ -1,26 +1,26 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
-  HomeIcon,
-  CubeIcon,
-  FolderIcon,
-  BuildingOfficeIcon,
-  ArrowUpTrayIcon,
-  ArrowDownTrayIcon,
-  DocumentTextIcon,
-  UsersIcon,
+  ChartBarIcon,
+  ShoppingBagIcon,
+  Squares2X2Icon,
+  BuildingStorefrontIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
+  ClipboardDocumentListIcon,
+  UserGroupIcon,
   Bars3Icon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
 import {
-  HomeIcon as HomeIconSolid,
-  CubeIcon as CubeIconSolid,
-  FolderIcon as FolderIconSolid,
-  BuildingOfficeIcon as BuildingOfficeIconSolid,
-  ArrowUpTrayIcon as ArrowUpTrayIconSolid,
-  ArrowDownTrayIcon as ArrowDownTrayIconSolid,
-  DocumentTextIcon as DocumentTextIconSolid,
-  UsersIcon as UsersIconSolid
+  ChartBarIcon as ChartBarIconSolid,
+  ShoppingBagIcon as ShoppingBagIconSolid,
+  Squares2X2Icon as Squares2X2IconSolid,
+  BuildingStorefrontIcon as BuildingStorefrontIconSolid,
+  ArrowTrendingUpIcon as ArrowTrendingUpIconSolid,
+  ArrowTrendingDownIcon as ArrowTrendingDownIconSolid,
+  ClipboardDocumentListIcon as ClipboardDocumentListIconSolid,
+  UserGroupIcon as UserGroupIconSolid
 } from '@heroicons/react/24/solid';
 
 const Sidebar = () => {
@@ -32,73 +32,74 @@ const Sidebar = () => {
     { 
       path: '/dashboard', 
       label: 'Dashboard', 
-      icon: HomeIcon, 
-      iconSolid: HomeIconSolid,
-      color: 'blue'
+      icon: ChartBarIcon, 
+      iconSolid: ChartBarIconSolid,
+      color: 'blue',
+      gradient: 'from-blue-500 to-blue-600'
     },
     { 
       path: '/products', 
       label: 'Productos', 
-      icon: CubeIcon, 
-      iconSolid: CubeIconSolid,
-      color: 'green'
+      icon: ShoppingBagIcon, 
+      iconSolid: ShoppingBagIconSolid,
+      color: 'green',
+      gradient: 'from-green-500 to-emerald-600'
     },
     { 
       path: '/categories', 
       label: 'Categorías', 
-      icon: FolderIcon, 
-      iconSolid: FolderIconSolid,
-      color: 'purple'
+      icon: Squares2X2Icon, 
+      iconSolid: Squares2X2IconSolid,
+      color: 'purple',
+      gradient: 'from-purple-500 to-indigo-600'
     },
     { 
       path: '/suppliers', 
       label: 'Proveedores', 
-      icon: BuildingOfficeIcon, 
-      iconSolid: BuildingOfficeIconSolid,
-      color: 'orange'
+      icon: BuildingStorefrontIcon, 
+      iconSolid: BuildingStorefrontIconSolid,
+      color: 'orange',
+      gradient: 'from-orange-500 to-amber-600'
     },
     { 
       path: '/entries', 
       label: 'Entradas', 
-      icon: ArrowUpTrayIcon, 
-      iconSolid: ArrowUpTrayIconSolid,
-      color: 'emerald'
+      icon: ArrowTrendingUpIcon, 
+      iconSolid: ArrowTrendingUpIconSolid,
+      color: 'emerald',
+      gradient: 'from-emerald-500 to-teal-600'
     },
     { 
       path: '/exits', 
       label: 'Salidas', 
-      icon: ArrowDownTrayIcon, 
-      iconSolid: ArrowDownTrayIconSolid,
-      color: 'red'
+      icon: ArrowTrendingDownIcon, 
+      iconSolid: ArrowTrendingDownIconSolid,
+      color: 'red',
+      gradient: 'from-red-500 to-rose-600'
     },
     { 
       path: '/movements', 
       label: 'Movimientos', 
-      icon: DocumentTextIcon, 
-      iconSolid: DocumentTextIconSolid,
-      color: 'indigo'
+      icon: ClipboardDocumentListIcon, 
+      iconSolid: ClipboardDocumentListIconSolid,
+      color: 'indigo',
+      gradient: 'from-indigo-500 to-blue-600'
     },
     { 
       path: '/users', 
       label: 'Usuarios', 
-      icon: UsersIcon, 
-      iconSolid: UsersIconSolid,
-      color: 'pink'
+      icon: UserGroupIcon, 
+      iconSolid: UserGroupIconSolid,
+      color: 'pink',
+      gradient: 'from-pink-500 to-rose-600'
     }
   ];
 
-  const getColorClasses = (color, isActive) => {
-    const colors = {
-      blue: isActive ? 'bg-blue-50 text-blue-700 border-blue-200' : 'text-gray-600 hover:bg-blue-50 hover:text-blue-700',
-      green: isActive ? 'bg-green-50 text-green-700 border-green-200' : 'text-gray-600 hover:bg-green-50 hover:text-green-700',
-      purple: isActive ? 'bg-purple-50 text-purple-700 border-purple-200' : 'text-gray-600 hover:bg-purple-50 hover:text-purple-700',
-      orange: isActive ? 'bg-orange-50 text-orange-700 border-orange-200' : 'text-gray-600 hover:bg-orange-50 hover:text-orange-700',
-      emerald: isActive ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'text-gray-600 hover:bg-emerald-50 hover:text-emerald-700',
-      red: isActive ? 'bg-red-50 text-red-700 border-red-200' : 'text-gray-600 hover:bg-red-50 hover:text-red-700',
-      indigo: isActive ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'text-gray-600 hover:bg-indigo-50 hover:text-indigo-700',
-      pink: isActive ? 'bg-pink-50 text-pink-700 border-pink-200' : 'text-gray-600 hover:bg-pink-50 hover:text-pink-700'
-    };
-    return colors[color] || colors.blue;
+  const getColorClasses = (item, isActive) => {
+    if (isActive) {
+      return `bg-gradient-to-r ${item.gradient} text-white shadow-lg border-l-4 border-white/50`;
+    }
+    return `text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:${item.gradient} hover:text-white hover:shadow-md hover:border-l-4 hover:border-white/50 transition-all duration-200 border-l-4 border-transparent`;
   };
 
   return (
@@ -129,31 +130,31 @@ const Sidebar = () => {
         className={`
           fixed lg:static
           top-0 left-0
-          ${isCollapsed ? 'w-20' : 'w-64'} h-full
-          bg-white border-r border-gray-200
-          shadow-lg lg:shadow-sm
+          ${isCollapsed ? 'w-20' : 'w-72'} h-full
+          bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700
+          shadow-xl lg:shadow-lg
           z-50 lg:z-auto
           transform transition-all duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
       >
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-600 to-blue-700">
           <div className="flex items-center justify-between">
             <div className={`flex items-center space-x-3 ${isCollapsed ? 'justify-center w-full' : ''}`}>
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
-                <span className="text-white font-bold text-lg">IB</span>
+              <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg flex-shrink-0 ring-2 ring-white/30">
+                <span className="text-white font-bold text-xl">IB</span>
               </div>
               {!isCollapsed && (
                 <div>
-                  <h2 className="text-sm font-bold text-gray-900">Inventario</h2>
-                  <p className="text-xs text-gray-500">Ferretería Bastidas</p>
+                  <h2 className="text-base font-bold text-white">Inventario</h2>
+                  <p className="text-xs text-blue-100">Ferretería Bastidas</p>
                 </div>
               )}
             </div>
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="hidden lg:flex p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                className="hidden lg:flex p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-all"
                 aria-label={isCollapsed ? "Expandir menú" : "Colapsar menú"}
                 title={isCollapsed ? "Expandir menú" : "Colapsar menú"}
               >
@@ -161,7 +162,7 @@ const Sidebar = () => {
               </button>
               <button
                 onClick={() => setIsOpen(false)}
-                className="lg:hidden p-1 text-gray-500 hover:text-gray-700"
+                className="lg:hidden p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-all"
                 aria-label="Cerrar menú"
               >
                 <XMarkIcon className="h-5 w-5" />
@@ -169,7 +170,7 @@ const Sidebar = () => {
             </div>
           </div>
         </div>
-        <nav className={`p-4 space-y-1 overflow-y-auto h-[calc(100vh-100px)] ${isCollapsed ? 'px-2' : ''}`}>
+        <nav className={`p-4 space-y-2 overflow-y-auto h-[calc(100vh-120px)] ${isCollapsed ? 'px-3' : 'px-4'}`}>
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
             const IconComponent = isActive ? item.iconSolid : item.icon;
@@ -178,16 +179,24 @@ const Sidebar = () => {
                 key={item.path}
                 to={item.path}
                 onClick={() => setIsOpen(false)}
-                className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-4'} py-3 rounded-lg transition-all duration-200 border-l-4 ${
-                  getColorClasses(item.color, isActive)
-                } ${isActive ? 'font-semibold shadow-sm' : 'font-medium'} ${isCollapsed ? 'relative group' : ''}`}
+                className={`
+                  flex items-center 
+                  ${isCollapsed ? 'justify-center px-3' : 'px-4'} 
+                  py-3.5 rounded-xl 
+                  transition-all duration-300 
+                  ${getColorClasses(item, isActive)}
+                  ${isActive ? 'font-bold scale-105 shadow-lg' : 'font-semibold'} 
+                  ${isCollapsed ? 'relative group' : ''}
+                  transform hover:scale-105
+                `}
                 title={isCollapsed ? item.label : ''}
               >
-                <IconComponent className={`h-5 w-5 ${isCollapsed ? '' : 'mr-3'} ${isActive ? 'scale-110' : ''} transition-transform flex-shrink-0`} />
-                {!isCollapsed && <span>{item.label}</span>}
+                <IconComponent className={`h-6 w-6 ${isCollapsed ? '' : 'mr-3'} transition-transform flex-shrink-0 ${isActive ? 'scale-110' : ''}`} />
+                {!isCollapsed && <span className="text-sm">{item.label}</span>}
                 {isCollapsed && (
-                  <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50">
+                  <div className="absolute left-full ml-3 px-4 py-2 bg-gray-900 dark:bg-gray-800 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-xl border border-gray-700">
                     {item.label}
+                    <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900 dark:border-r-gray-800"></div>
                   </div>
                 )}
               </Link>

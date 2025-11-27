@@ -37,9 +37,9 @@ const PrivateRoute = ({ children }) => {
 const AppContent = () => {
   const { isAuthenticated, loading } = useAuth();
   
-  // Activar timeout de sesión y tema
+  // Activar timeout de sesión y tema (debe estar antes del return para aplicar el tema)
   useSessionTimeout();
-  useTheme(); // Aplicar tema al cargar
+  useTheme(); // Aplicar tema al cargar - esto aplica el tema a html y body
 
   if (loading) {
     return <Loading />;
@@ -57,11 +57,11 @@ const AppContent = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors">
       <Sidebar />
       <div className="flex-1 flex flex-col min-h-screen">
         <Header />
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 pb-4">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-gray-900 pb-4 transition-colors">
           <div className="min-h-[calc(100vh-200px)]">
             <Routes>
               <Route path="/dashboard" element={<Dashboard />} />
