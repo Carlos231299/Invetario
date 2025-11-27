@@ -22,6 +22,8 @@ export const useAuth = () => {
   const logout = () => {
     authService.logout();
     setUser(null);
+    // Redirigir al login
+    window.location.href = '/login';
   };
 
   return {

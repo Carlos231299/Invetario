@@ -14,7 +14,7 @@ export const requestPasswordReset = async (email) => {
   expires.setMinutes(expires.getMinutes() + 15); // Expira en 15 minutos
 
   await User.setResetCode(email, resetCode, expires);
-  await sendPasswordResetCode(email, resetCode);
+  await sendPasswordResetCode(email, resetCode, user.nombre);
 
   return { success: true, message: 'Código de recuperación enviado a tu correo electrónico' };
 };

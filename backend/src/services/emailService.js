@@ -1,6 +1,6 @@
 import { sendEmail } from '../config/email.js';
 
-export const sendPasswordResetCode = async (email, resetCode) => {
+export const sendPasswordResetCode = async (email, resetCode, nombreUsuario = 'Usuario') => {
   const html = `
     <!DOCTYPE html>
     <html>
@@ -14,6 +14,7 @@ export const sendPasswordResetCode = async (email, resetCode) => {
         .code { font-size: 32px; font-weight: bold; text-align: center; letter-spacing: 8px; color: #2563eb; padding: 20px; background-color: white; border: 2px solid #2563eb; border-radius: 8px; margin: 20px 0; }
         .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
         .warning { background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; margin: 20px 0; }
+        .greeting { font-size: 18px; font-weight: bold; color: #2563eb; margin-bottom: 10px; }
       </style>
     </head>
     <body>
@@ -22,7 +23,7 @@ export const sendPasswordResetCode = async (email, resetCode) => {
           <h1>Recuperación de Contraseña</h1>
         </div>
         <div class="content">
-          <p>Hola,</p>
+          <p class="greeting">Hola ${nombreUsuario},</p>
           <p>Has solicitado restablecer tu contraseña para el sistema de Inventario Ferretería Bastidas.</p>
           <p>Tu código de recuperación es:</p>
           <div class="code">${resetCode}</div>
@@ -35,6 +36,7 @@ export const sendPasswordResetCode = async (email, resetCode) => {
             </ul>
           </div>
           <p>Ingresa este código en la página de recuperación de contraseña para continuar.</p>
+          <p>Saludos,<br>Equipo de Inventario Ferretería Bastidas</p>
         </div>
         <div class="footer">
           <p>Inventario Ferretería Bastidas</p>

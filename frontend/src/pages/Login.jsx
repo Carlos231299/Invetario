@@ -23,7 +23,8 @@ const Login = () => {
     try {
       const result = await login(values.email, values.password);
       if (result.success) {
-        navigate('/dashboard');
+        // Forzar navegación al dashboard
+        window.location.href = '/dashboard';
       } else {
         setAlert({ type: 'error', message: result.message || 'Error al iniciar sesión' });
       }

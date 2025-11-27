@@ -1,5 +1,6 @@
 import { body, param, query, validationResult } from 'express-validator';
 import { AppError } from './errorHandler.js';
+import { validatePassword } from '../utils/passwordValidator.js';
 
 export const validate = (validations) => {
   return async (req, res, next) => {
@@ -26,7 +27,13 @@ export const validateLogin = [
 export const validateRegister = [
   body('nombre').trim().notEmpty().withMessage('Nombre requerido'),
   body('email').isEmail().withMessage('Email inválido'),
-  body('password').isLength({ min: 6 }).withMessage('La contraseña debe tener al menos 6 caracteres')
+  body('password').custom((value) => {
+    const validation = validatePassword(value);
+    if (!validation.isValid) {
+      throw new Error(validation.errors.join('. '));
+    }
+    return true;
+  })
 ];
 
 export const validateForgotPassword = [
@@ -36,7 +43,13 @@ export const validateForgotPassword = [
 export const validateResetPassword = [
   body('email').isEmail().withMessage('Email inválido'),
   body('code').isLength({ min: 6, max: 6 }).withMessage('El código debe tener 6 dígitos'),
-  body('password').isLength({ min: 6 }).withMessage('La contraseña debe tener al menos 6 caracteres')
+  body('password').custom((value) => {
+    const validation = validatePassword(value);
+    if (!validation.isValid) {
+      throw new Error(validation.errors.join('. '));
+    }
+    return true;
+  })
 ];
 
 export const validateVerifyCode = [

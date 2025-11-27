@@ -6,6 +6,7 @@ import Input from '../components/Input.jsx';
 import PasswordInput from '../components/PasswordInput.jsx';
 import Alert from '../components/Alert.jsx';
 import { useForm } from '../hooks/useForm.js';
+import { validatePassword, getPasswordRequirements } from '../utils/passwordValidator.js';
 
 const PasswordReset = () => {
   const navigate = useNavigate();
@@ -66,8 +67,12 @@ const PasswordReset = () => {
       return;
     }
 
-    if (values.password.length < 6) {
-      setAlert({ type: 'error', message: 'La contraseña debe tener al menos 6 caracteres' });
+    const passwordValidation = validatePassword(values.password);
+    if (!passwordValidation.isValid) {
+      setAlert({ 
+        type: 'error', 
+        message: 'La contraseña no cumple con los requisitos: ' + passwordValidation.errors.join(', ') 
+      });
       return;
     }
 
@@ -195,6 +200,16 @@ const PasswordReset = () => {
             required
             disabled={loading}
           />
+          <div className="mb-4 text-xs text-gray-600">
+            <p className="font-semibold mb-1">Requisitos de contraseña:</p>
+            <ul className="list-disc list-inside space-y-1">
+              {getPasswordRequirements().map((req, idx) => (
+                <li key={idx} className={validatePassword(values.password).errors.some(e => e.includes(req.split(' ')[0])) ? 'text-gray-400' : 'text-gray-600'}>
+                  {req}
+                </li>
+              ))}
+            </ul>
+          </div>
           <PasswordInput
             label="Confirmar Contraseña"
             name="confirmPassword"
