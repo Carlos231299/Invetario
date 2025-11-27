@@ -7,10 +7,19 @@ export class Product {
       INSERT INTO products (codigo, nombre, descripcion, categoria_id, proveedor_id, stock, stock_minimo, precio_compra, precio_venta)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
-    const [result] = await pool.execute(query, [
-      codigo, nombre, descripcion, categoria_id, proveedor_id, 
-      stock || 0, stock_minimo || 0, precio_compra || 0, precio_venta || 0
-    ]);
+    // Asegurar que todos los valores numéricos sean del tipo correcto
+    const params = [
+      codigo || null,
+      nombre || null,
+      descripcion || null,
+      categoria_id ? parseInt(categoria_id) : null,
+      proveedor_id ? parseInt(proveedor_id) : null,
+      stock ? parseInt(stock) : 0,
+      stock_minimo ? parseInt(stock_minimo) : 0,
+      precio_compra ? parseFloat(precio_compra) : 0,
+      precio_venta ? parseFloat(precio_venta) : 0
+    ];
+    const [result] = await pool.execute(query, params);
     return result.insertId;
   }
 
@@ -33,14 +42,14 @@ export class Product {
       params.push(searchTerm, searchTerm);
     }
 
-    if (filters.categoria_id) {
+    if (filters.categoria_id && !isNaN(parseInt(filters.categoria_id))) {
       query += ' AND p.categoria_id = ?';
-      params.push(filters.categoria_id);
+      params.push(parseInt(filters.categoria_id));
     }
 
-    if (filters.proveedor_id) {
+    if (filters.proveedor_id && !isNaN(parseInt(filters.proveedor_id))) {
       query += ' AND p.proveedor_id = ?';
-      params.push(filters.proveedor_id);
+      params.push(parseInt(filters.proveedor_id));
     }
 
     if (filters.stock_bajo !== undefined) {
@@ -63,7 +72,7 @@ export class Product {
       LEFT JOIN suppliers s ON p.proveedor_id = s.id
       WHERE p.id = ?
     `;
-    const [rows] = await pool.execute(query, [id]);
+    const [rows] = await pool.execute(query, [parseInt(id)]);
     return rows[0] || null;
   }
 
@@ -81,22 +90,32 @@ export class Product {
           stock = ?, stock_minimo = ?, precio_compra = ?, precio_venta = ?, activo = ?
       WHERE id = ?
     `;
-    await pool.execute(query, [
-      nombre, descripcion, categoria_id, proveedor_id,
-      stock, stock_minimo, precio_compra, precio_venta, activo, id
-    ]);
+    // Asegurar que todos los valores numéricos sean del tipo correcto
+    const params = [
+      nombre || null,
+      descripcion || null,
+      categoria_id ? parseInt(categoria_id) : null,
+      proveedor_id ? parseInt(proveedor_id) : null,
+      stock ? parseInt(stock) : 0,
+      stock_minimo ? parseInt(stock_minimo) : 0,
+      precio_compra ? parseFloat(precio_compra) : 0,
+      precio_venta ? parseFloat(precio_venta) : 0,
+      activo ? (activo === true || activo === 1 || activo === '1') : false,
+      parseInt(id)
+    ];
+    await pool.execute(query, params);
     return true;
   }
 
   static async updateStock(id, cantidad) {
     const query = 'UPDATE products SET stock = stock + ? WHERE id = ?';
-    await pool.execute(query, [cantidad, id]);
+    await pool.execute(query, [parseInt(cantidad), parseInt(id)]);
     return true;
   }
 
   static async delete(id) {
     const query = 'DELETE FROM products WHERE id = ?';
-    await pool.execute(query, [id]);
+    await pool.execute(query, [parseInt(id)]);
     return true;
   }
 

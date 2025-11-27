@@ -11,7 +11,8 @@ import {
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
-  const [filter, setFilter] = useState('all'); // all, unread, read
+  const [filter, setFilter] = useState('unread'); // all, unread, read
+  const [expandedId, setExpandedId] = useState(null);
 
   // Notificaciones de ejemplo (en producción vendrían del backend)
   useEffect(() => {
@@ -21,32 +22,40 @@ const Notifications = () => {
         type: 'success',
         title: 'Producto agregado',
         message: 'El producto "Martillo" ha sido agregado exitosamente',
+        details: 'Producto: Martillo\nCódigo: MART-001\nCategoría: Herramientas\nStock inicial: 50 unidades\nPrecio de compra: $15,000\nPrecio de venta: $25,000',
         timestamp: new Date(Date.now() - 1000 * 60 * 5),
-        read: false
+        read: false,
+        actionUrl: '/products'
       },
       {
         id: 2,
         type: 'warning',
         title: 'Stock bajo',
         message: 'El producto "Clavos" tiene stock bajo (5 unidades)',
+        details: 'Producto: Clavos\nCódigo: CLAV-002\nStock actual: 5 unidades\nStock mínimo: 20 unidades\nDéficit: 15 unidades\nSe recomienda realizar una orden de compra.',
         timestamp: new Date(Date.now() - 1000 * 60 * 30),
-        read: false
+        read: false,
+        actionUrl: '/products'
       },
       {
         id: 3,
         type: 'info',
         title: 'Nueva entrada',
         message: 'Se registró una nueva entrada de 50 unidades',
+        details: 'Producto: Pintura Blanca\nCantidad: 50 unidades\nProveedor: Pinturas Colombia\nUsuario: Carlos Bastidas\nFecha: ' + new Date(Date.now() - 1000 * 60 * 60 * 2).toLocaleString(),
         timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
-        read: true
+        read: true,
+        actionUrl: '/entries'
       },
       {
         id: 4,
         type: 'error',
         title: 'Error en salida',
         message: 'No se pudo registrar la salida: stock insuficiente',
+        details: 'Producto: Tornillos\nStock disponible: 10 unidades\nCantidad solicitada: 25 unidades\nDéficit: 15 unidades\nPor favor, verifica el stock disponible antes de realizar la salida.',
         timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5),
-        read: true
+        read: true,
+        actionUrl: '/exits'
       }
     ];
     setNotifications(mockNotifications);
@@ -82,14 +91,27 @@ const Notifications = () => {
     setNotifications(notifications.map(n => 
       n.id === id ? { ...n, read: true } : n
     ));
+    // Si el filtro es solo sin leer, cambiar a todas después de marcar como leída
+    if (filter === 'unread') {
+      setTimeout(() => setFilter('all'), 500);
+    }
   };
 
   const markAllAsRead = () => {
     setNotifications(notifications.map(n => ({ ...n, read: true })));
+    // Cambiar filtro a todas después de marcar todas como leídas
+    setTimeout(() => setFilter('all'), 500);
   };
 
   const deleteNotification = (id) => {
     setNotifications(notifications.filter(n => n.id !== id));
+    if (expandedId === id) {
+      setExpandedId(null);
+    }
+  };
+
+  const toggleExpand = (id) => {
+    setExpandedId(expandedId === id ? null : id);
   };
 
   const filteredNotifications = notifications.filter(n => {
@@ -183,7 +205,8 @@ const Notifications = () => {
                 key={notification.id}
                 className={`p-4 rounded-lg border ${getBgColor(notification.type)} ${
                   !notification.read ? 'ring-2 ring-blue-500' : ''
-                }`}
+                } cursor-pointer hover:shadow-md transition-shadow`}
+                onClick={() => toggleExpand(notification.id)}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-3 flex-1">
@@ -193,17 +216,38 @@ const Notifications = () => {
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
                         <h3 className="font-semibold text-gray-900">{notification.title}</h3>
-                        {!notification.read && (
-                          <span className="ml-2 px-2 py-1 bg-blue-600 text-white text-xs rounded-full">
-                            Nuevo
-                          </span>
-                        )}
+                        <div className="flex items-center space-x-2">
+                          {!notification.read && (
+                            <span className="px-2 py-1 bg-blue-600 text-white text-xs rounded-full">
+                              Nuevo
+                            </span>
+                          )}
+                          {notification.details && (
+                            <span className="text-xs text-gray-500">
+                              {expandedId === notification.id ? '▼' : '▶'}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
+                      {expandedId === notification.id && notification.details && (
+                        <div className="mt-3 p-3 bg-white bg-opacity-50 rounded-lg border border-gray-200">
+                          <p className="text-sm text-gray-700 whitespace-pre-line">{notification.details}</p>
+                          {notification.actionUrl && (
+                            <a
+                              href={notification.actionUrl}
+                              onClick={(e) => e.stopPropagation()}
+                              className="mt-2 inline-block text-sm text-blue-600 hover:text-blue-800 font-medium"
+                            >
+                              Ver detalles →
+                            </a>
+                          )}
+                        </div>
+                      )}
                       <p className="text-xs text-gray-500 mt-2">{formatTime(notification.timestamp)}</p>
                     </div>
                   </div>
-                  <div className="flex space-x-2 ml-4">
+                  <div className="flex space-x-2 ml-4" onClick={(e) => e.stopPropagation()}>
                     {!notification.read && (
                       <button
                         onClick={() => markAsRead(notification.id)}

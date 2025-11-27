@@ -26,6 +26,7 @@ import {
 const Sidebar = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const menuItems = [
     { 
@@ -128,35 +129,47 @@ const Sidebar = () => {
         className={`
           fixed lg:static
           top-0 left-0
-          w-64 h-full
+          ${isCollapsed ? 'w-20' : 'w-64'} h-full
           bg-white border-r border-gray-200
           shadow-lg lg:shadow-sm
           z-50 lg:z-auto
-          transform transition-transform duration-300 ease-in-out
+          transform transition-all duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
       >
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-md">
+            <div className={`flex items-center space-x-3 ${isCollapsed ? 'justify-center w-full' : ''}`}>
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
                 <span className="text-white font-bold text-lg">IB</span>
               </div>
-              <div>
-                <h2 className="text-sm font-bold text-gray-900">Inventario</h2>
-                <p className="text-xs text-gray-500">Ferretería Bastidas</p>
-              </div>
+              {!isCollapsed && (
+                <div>
+                  <h2 className="text-sm font-bold text-gray-900">Inventario</h2>
+                  <p className="text-xs text-gray-500">Ferretería Bastidas</p>
+                </div>
+              )}
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="lg:hidden p-1 text-gray-500 hover:text-gray-700"
-              aria-label="Cerrar menú"
-            >
-              <XMarkIcon className="h-5 w-5" />
-            </button>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setIsCollapsed(!isCollapsed)}
+                className="hidden lg:flex p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                aria-label={isCollapsed ? "Expandir menú" : "Colapsar menú"}
+                title={isCollapsed ? "Expandir menú" : "Colapsar menú"}
+              >
+                <Bars3Icon className="h-5 w-5" />
+              </button>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="lg:hidden p-1 text-gray-500 hover:text-gray-700"
+                aria-label="Cerrar menú"
+              >
+                <XMarkIcon className="h-5 w-5" />
+              </button>
+            </div>
           </div>
         </div>
-        <nav className="p-4 space-y-1 overflow-y-auto h-[calc(100vh-100px)]">
+        <nav className={`p-4 space-y-1 overflow-y-auto h-[calc(100vh-100px)] ${isCollapsed ? 'px-2' : ''}`}>
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
             const IconComponent = isActive ? item.iconSolid : item.icon;
@@ -165,12 +178,18 @@ const Sidebar = () => {
                 key={item.path}
                 to={item.path}
                 onClick={() => setIsOpen(false)}
-                className={`flex items-center px-4 py-3 rounded-lg transition-all duration-200 border-l-4 ${
+                className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-4'} py-3 rounded-lg transition-all duration-200 border-l-4 ${
                   getColorClasses(item.color, isActive)
-                } ${isActive ? 'font-semibold shadow-sm' : 'font-medium'}`}
+                } ${isActive ? 'font-semibold shadow-sm' : 'font-medium'} ${isCollapsed ? 'relative group' : ''}`}
+                title={isCollapsed ? item.label : ''}
               >
-                <IconComponent className={`h-5 w-5 mr-3 ${isActive ? 'scale-110' : ''} transition-transform`} />
-                <span>{item.label}</span>
+                <IconComponent className={`h-5 w-5 ${isCollapsed ? '' : 'mr-3'} ${isActive ? 'scale-110' : ''} transition-transform flex-shrink-0`} />
+                {!isCollapsed && <span>{item.label}</span>}
+                {isCollapsed && (
+                  <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50">
+                    {item.label}
+                  </div>
+                )}
               </Link>
             );
           })}

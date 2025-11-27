@@ -2,9 +2,11 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuth } from './hooks/useAuth.js';
 import { useSessionTimeout } from './hooks/useSessionTimeout.js';
+import { useTheme } from './hooks/useTheme.js';
 import Header from './components/Header.jsx';
 import Sidebar from './components/Sidebar.jsx';
 import Footer from './components/Footer.jsx';
+import FloatingWhatsApp from './components/FloatingWhatsApp.jsx';
 import Login from './pages/Login.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Products from './pages/Products.jsx';
@@ -35,8 +37,9 @@ const PrivateRoute = ({ children }) => {
 const AppContent = () => {
   const { isAuthenticated, loading } = useAuth();
   
-  // Activar timeout de sesión
+  // Activar timeout de sesión y tema
   useSessionTimeout();
+  useTheme(); // Aplicar tema al cargar
 
   if (loading) {
     return <Loading />;
@@ -77,6 +80,7 @@ const AppContent = () => {
         </main>
         <Footer />
       </div>
+      <FloatingWhatsApp />
     </div>
   );
 };

@@ -28,7 +28,7 @@ export class Supplier {
 
   static async findById(id) {
     const query = 'SELECT * FROM suppliers WHERE id = ?';
-    const [rows] = await pool.execute(query, [id]);
+    const [rows] = await pool.execute(query, [parseInt(id)]);
     return rows[0] || null;
   }
 
@@ -39,13 +39,20 @@ export class Supplier {
       SET nombre = ?, contacto = ?, telefono = ?, email = ?, direccion = ?
       WHERE id = ?
     `;
-    await pool.execute(query, [nombre, contacto, telefono, email, direccion, id]);
+    await pool.execute(query, [
+      nombre || null,
+      contacto || null,
+      telefono || null,
+      email || null,
+      direccion || null,
+      parseInt(id)
+    ]);
     return true;
   }
 
   static async delete(id) {
     const query = 'DELETE FROM suppliers WHERE id = ?';
-    await pool.execute(query, [id]);
+    await pool.execute(query, [parseInt(id)]);
     return true;
   }
 }

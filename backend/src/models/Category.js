@@ -16,20 +16,20 @@ export class Category {
 
   static async findById(id) {
     const query = 'SELECT * FROM categories WHERE id = ?';
-    const [rows] = await pool.execute(query, [id]);
+    const [rows] = await pool.execute(query, [parseInt(id)]);
     return rows[0] || null;
   }
 
   static async update(id, categoryData) {
     const { nombre, descripcion } = categoryData;
     const query = 'UPDATE categories SET nombre = ?, descripcion = ? WHERE id = ?';
-    await pool.execute(query, [nombre, descripcion, id]);
+    await pool.execute(query, [nombre || null, descripcion || null, parseInt(id)]);
     return true;
   }
 
   static async delete(id) {
     const query = 'DELETE FROM categories WHERE id = ?';
-    await pool.execute(query, [id]);
+    await pool.execute(query, [parseInt(id)]);
     return true;
   }
 }

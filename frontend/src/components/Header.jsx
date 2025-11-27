@@ -51,11 +51,21 @@ const Header = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <div className="hidden md:flex items-center space-x-3 px-4 py-2 bg-gray-50 rounded-lg border border-gray-200">
-                <UserCircleIcon className="h-5 w-5 text-gray-600" />
+              <div className="hidden md:flex items-center space-x-3 px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                {user?.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt={user?.nombre}
+                    className="w-10 h-10 rounded-full object-cover border-2 border-gray-300 dark:border-gray-600"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">
+                    {user?.nombre?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                )}
                 <div className="text-sm">
-                  <p className="font-semibold text-gray-900">{user?.nombre}</p>
-                  <p className="text-xs text-gray-500">{user?.rol}</p>
+                  <p className="font-semibold text-gray-900 dark:text-gray-100">{user?.nombre}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{user?.rol}</p>
                 </div>
               </div>
               <button 
