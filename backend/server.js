@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { errorHandler } from './src/middlewares/errorHandler.js';
+import { testConnection } from './src/database/connection.js';
 
 // Importar rutas
 import authRoutes from './src/routes/auth.js';
@@ -81,9 +82,20 @@ app.get('/api/health', (req, res) => {
 // Manejo de errores
 app.use(errorHandler);
 
-// Iniciar servidor
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
-  console.log(`📡 Ambiente: ${process.env.NODE_ENV || 'development'}`);
+// Probar conexión a la base de datos antes de iniciar
+testConnection().then(success => {
+  if (!success) {
+    console.error('⚠️  Advertencia: No se pudo conectar a la base de datos. El servidor se iniciará pero algunas funciones pueden no funcionar.');
+  }
+  
+  // Iniciar servidor
+  app.listen(PORT, () => {
+    console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
+    console.log(`📡 Ambiente: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`🗄️  Base de datos: ${process.env.DB_NAME || 'inventario_ferreteria_bastidas'}`);
+  });
+}).catch(error => {
+  console.error('❌ Error al iniciar servidor:', error);
+  process.exit(1);
 });
 

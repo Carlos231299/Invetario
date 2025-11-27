@@ -20,11 +20,21 @@ const pool = mysql.createPool({
 export const testConnection = async () => {
   try {
     const connection = await pool.getConnection();
+    await connection.ping();
     console.log('✅ Conexión a MySQL establecida correctamente');
     connection.release();
     return true;
   } catch (error) {
-    console.error('❌ Error al conectar con MySQL:', error.message);
+    console.error('❌ Error al conectar con MySQL:', {
+      message: error.message,
+      code: error.code,
+      errno: error.errno,
+      sqlState: error.sqlState,
+      host: process.env.DB_HOST,
+      port: process.env.DB_PORT,
+      user: process.env.DB_USER,
+      database: process.env.DB_NAME
+    });
     return false;
   }
 };
