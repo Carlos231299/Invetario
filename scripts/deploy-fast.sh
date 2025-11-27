@@ -66,8 +66,17 @@ echo "  - Configurando base de datos..."
 ssh_exec "sudo systemctl start mysql 2>/dev/null || true"
 ssh_exec "sudo systemctl enable mysql 2>/dev/null || true"
 ssh_exec "sleep 2"  # Esperar a que MySQL inicie
+
+# Crear base de datos
 ssh_exec "sudo mysql -e 'CREATE DATABASE IF NOT EXISTS inventario_ferreteria_bastidas;' 2>/dev/null || true"
-ssh_exec "sudo mysql -e 'SELECT 1;' inventario_ferreteria_bastidas 2>/dev/null || echo '⚠️  Advertencia: No se pudo conectar a la base de datos'"
+
+# Crear usuario MySQL para la aplicación (sin contraseña)
+echo "  - Configurando usuario MySQL..."
+ssh_exec "sudo mysql -e \"
+CREATE USER IF NOT EXISTS 'inventario'@'localhost' IDENTIFIED BY '';
+GRANT ALL PRIVILEGES ON inventario_ferreteria_bastidas.* TO 'inventario'@'localhost';
+FLUSH PRIVILEGES;
+\" 2>/dev/null || true"
 
 # Backend
 echo "  - Instalando dependencias del backend..."
@@ -83,7 +92,7 @@ PORT=5000
 NODE_ENV=production
 DB_HOST=localhost
 DB_PORT=3306
-DB_USER=root
+DB_USER=inventario
 DB_PASSWORD=
 DB_NAME=inventario_ferreteria_bastidas
 JWT_SECRET=\$JWT_SECRET
