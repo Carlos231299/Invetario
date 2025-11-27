@@ -9,10 +9,10 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 PEM_FILE="$PROJECT_ROOT/plataforma2.0.pem"
-SERVER="ubuntu@ec2-54-193-89-101.us-west-1.compute.amazonaws.com"
+SERVER="ubuntu@ec2-54-193-218-76.us-west-1.compute.amazonaws.com"
 APP_DIR="/var/www/inventario-ferreteria-bastidas"
 GIT_REPO="https://github.com/Carlos231299/Invetario.git"
-SERVER_URL="http://ec2-54-193-89-101.us-west-1.compute.amazonaws.com"
+SERVER_URL="http://ec2-54-193-218-76.us-west-1.compute.amazonaws.com"
 
 if [ ! -f "$PEM_FILE" ]; then
     echo "❌ Error: No se encuentra el archivo $PEM_FILE"
@@ -109,5 +109,5 @@ ssh_exec "sudo rm -f /etc/nginx/sites-enabled/default"
 ssh_exec "sudo nginx -t && sudo systemctl reload nginx"
 
 echo "✅ Despliegue completado exitosamente!"
-echo "🌍 La aplicación está disponible en: http://ec2-54-193-89-101.us-west-1.compute.amazonaws.com"
+echo "🌍 La aplicación está disponible en: http://ec2-54-193-218-76.us-west-1.compute.amazonaws.com"
 

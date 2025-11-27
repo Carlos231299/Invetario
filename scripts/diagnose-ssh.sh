@@ -5,8 +5,8 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 PEM_FILE="$PROJECT_ROOT/plataforma2.0.pem"
-SERVER="ubuntu@ec2-54-193-89-101.us-west-1.compute.amazonaws.com"
-HOST="ec2-54-193-89-101.us-west-1.compute.amazonaws.com"
+SERVER="ubuntu@ec2-54-193-218-76.us-west-1.compute.amazonaws.com"
+HOST="ec2-54-193-218-76.us-west-1.compute.amazonaws.com"
 
 echo "🔍 Diagnóstico de conexión SSH..."
 echo ""

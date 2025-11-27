@@ -3,7 +3,7 @@
 # Script para verificar conectividad y estado del servidor
 
 PEM_FILE="plataforma2.0.pem"
-SERVER="ubuntu@ec2-54-193-89-101.us-west-1.compute.amazonaws.com"
+SERVER="ubuntu@ec2-54-193-218-76.us-west-1.compute.amazonaws.com"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"

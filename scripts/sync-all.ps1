@@ -63,7 +63,7 @@ try {
 Write-Host "Sincronizacion completa exitosa!" -ForegroundColor Green
 Write-Host ""
 Write-Host "La aplicacion esta disponible en:" -ForegroundColor Cyan
-Write-Host "http://ec2-54-193-89-101.us-west-1.compute.amazonaws.com" -ForegroundColor White
+Write-Host "http://ec2-54-193-218-76.us-west-1.compute.amazonaws.com" -ForegroundColor White
 Write-Host ""
 Write-Host "NOTA: Esta instancia es Windows Server." -ForegroundColor Yellow
 Write-Host "Para desplegar, usa: .\scripts\deploy-windows-simple.ps1" -ForegroundColor Yellow

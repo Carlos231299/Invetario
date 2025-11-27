@@ -3,7 +3,7 @@
 ## Pasos para verificar y corregir:
 
 1. **En la consola de AWS, ve a EC2 → Instancias**
-2. **Selecciona la instancia: i-0751510be895709cb**
+2. **Selecciona la instancia Ubuntu (ec2-54-193-218-76)**
 3. **Ve a la pestaña "Seguridad"**
 4. **Haz clic en el Security Group (sg-xxxxx)**
 5. **En "Reglas de entrada", verifica:**
