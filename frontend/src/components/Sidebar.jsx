@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   HomeIcon,
@@ -7,7 +8,9 @@ import {
   ArrowUpTrayIcon,
   ArrowDownTrayIcon,
   DocumentTextIcon,
-  UsersIcon
+  UsersIcon,
+  Bars3Icon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import {
   HomeIcon as HomeIconSolid,
@@ -22,6 +25,7 @@ import {
 
 const Sidebar = () => {
   const location = useLocation();
+  const [isOpen, setIsOpen] = useState(false);
 
   const menuItems = [
     { 
@@ -97,37 +101,82 @@ const Sidebar = () => {
   };
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 min-h-screen shadow-sm">
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-md">
-            <span className="text-white font-bold text-lg">IB</span>
-          </div>
-          <div>
-            <h2 className="text-sm font-bold text-gray-900">Inventario</h2>
-            <p className="text-xs text-gray-500">Ferretería Bastidas</p>
+    <>
+      {/* Botón móvil para abrir/cerrar */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+        aria-label="Toggle menu"
+      >
+        {isOpen ? (
+          <XMarkIcon className="h-6 w-6 text-gray-700" />
+        ) : (
+          <Bars3Icon className="h-6 w-6 text-gray-700" />
+        )}
+      </button>
+
+      {/* Overlay para móvil */}
+      {isOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={`
+          fixed lg:static
+          top-0 left-0
+          w-64 h-full
+          bg-white border-r border-gray-200
+          shadow-lg lg:shadow-sm
+          z-50 lg:z-auto
+          transform transition-transform duration-300 ease-in-out
+          ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}
+      >
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-md">
+                <span className="text-white font-bold text-lg">IB</span>
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-gray-900">Inventario</h2>
+                <p className="text-xs text-gray-500">Ferretería Bastidas</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="lg:hidden p-1 text-gray-500 hover:text-gray-700"
+              aria-label="Cerrar menú"
+            >
+              <XMarkIcon className="h-5 w-5" />
+            </button>
           </div>
         </div>
-      </div>
-      <nav className="p-4 space-y-1">
-        {menuItems.map((item) => {
-          const isActive = location.pathname === item.path;
-          const IconComponent = isActive ? item.iconSolid : item.icon;
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`flex items-center px-4 py-3 rounded-lg transition-all duration-200 border-l-4 ${
-                getColorClasses(item.color, isActive)
-              } ${isActive ? 'font-semibold shadow-sm' : 'font-medium'}`}
-            >
-              <IconComponent className={`h-5 w-5 mr-3 ${isActive ? 'scale-110' : ''} transition-transform`} />
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
-      </nav>
-    </aside>
+        <nav className="p-4 space-y-1 overflow-y-auto h-[calc(100vh-100px)]">
+          {menuItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            const IconComponent = isActive ? item.iconSolid : item.icon;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={() => setIsOpen(false)}
+                className={`flex items-center px-4 py-3 rounded-lg transition-all duration-200 border-l-4 ${
+                  getColorClasses(item.color, isActive)
+                } ${isActive ? 'font-semibold shadow-sm' : 'font-medium'}`}
+              >
+                <IconComponent className={`h-5 w-5 mr-3 ${isActive ? 'scale-110' : ''} transition-transform`} />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      </aside>
+    </>
   );
 };
 

@@ -10,12 +10,15 @@ export class Exit {
       await connection.beginTransaction();
 
       // Verificar stock disponible
+      const productId = parseInt(producto_id);
+      const cantidadNum = parseInt(cantidad);
+      
       const [product] = await connection.execute(
         'SELECT stock FROM products WHERE id = ?',
-        [producto_id]
+        [productId]
       );
 
-      if (!product[0] || product[0].stock < cantidad) {
+      if (!product[0] || product[0].stock < cantidadNum) {
         throw new Error('Stock insuficiente para esta salida');
       }
 
@@ -24,11 +27,17 @@ export class Exit {
         INSERT INTO exits (producto_id, cantidad, usuario_id, motivo, observaciones)
         VALUES (?, ?, ?, ?, ?)
       `;
-      // Asegurar que los valores sean del tipo correcto
+      // Asegurar que los valores sean del tipo correcto y válidos
+      const userId = parseInt(usuario_id);
+      
+      if (isNaN(userId)) {
+        throw new Error('Parámetros inválidos: usuario_id debe ser un número válido');
+      }
+      
       const params = [
-        parseInt(producto_id),
-        parseInt(cantidad),
-        parseInt(usuario_id),
+        productId,
+        cantidadNum,
+        userId,
         motivo || null,
         observaciones || null
       ];
@@ -37,11 +46,11 @@ export class Exit {
       // Actualizar stock del producto
       await connection.execute(
         'UPDATE products SET stock = stock - ? WHERE id = ?',
-        [cantidad, producto_id]
+        [cantidadNum, productId]
       );
 
       // Registrar en bitácora
-      await logMovement('salida', producto_id, cantidad, usuario_id, `Salida: ${motivo} - ${observaciones || ''}`);
+      await logMovement('salida', productId, cantidadNum, userId, `Salida: ${motivo} - ${observaciones || ''}`);
 
       await connection.commit();
       return result.insertId;
@@ -85,7 +94,15 @@ export class Exit {
     query += ' ORDER BY e.fecha DESC LIMIT ? OFFSET ?';
     const limit = parseInt(filters.limit) || 50;
     const offset = parseInt(filters.offset) || 0;
-    params.push(limit, offset);
+    
+    // Asegurar que limit y offset sean números válidos
+    if (isNaN(limit) || limit < 0) {
+      params.push(50, 0);
+    } else if (isNaN(offset) || offset < 0) {
+      params.push(limit, 0);
+    } else {
+      params.push(limit, offset);
+    }
 
     const [rows] = await pool.execute(query, params);
     return rows;

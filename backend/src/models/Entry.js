@@ -14,11 +14,19 @@ export class Entry {
         INSERT INTO entries (producto_id, cantidad, usuario_id, observaciones)
         VALUES (?, ?, ?, ?)
       `;
-      // Asegurar que los valores sean del tipo correcto
+      // Asegurar que los valores sean del tipo correcto y válidos
+      const productId = parseInt(producto_id);
+      const cantidadNum = parseInt(cantidad);
+      const userId = parseInt(usuario_id);
+      
+      if (isNaN(productId) || isNaN(cantidadNum) || isNaN(userId)) {
+        throw new Error('Parámetros inválidos: producto_id, cantidad y usuario_id deben ser números válidos');
+      }
+      
       const params = [
-        parseInt(producto_id),
-        parseInt(cantidad),
-        parseInt(usuario_id),
+        productId,
+        cantidadNum,
+        userId,
         observaciones || null
       ];
       const [result] = await connection.execute(query, params);
@@ -26,11 +34,11 @@ export class Entry {
       // Actualizar stock del producto
       await connection.execute(
         'UPDATE products SET stock = stock + ? WHERE id = ?',
-        [cantidad, producto_id]
+        [parseInt(cantidad), parseInt(producto_id)]
       );
 
       // Registrar en bitácora
-      await logMovement('entrada', producto_id, cantidad, usuario_id, `Entrada: ${observaciones || 'Sin observaciones'}`);
+      await logMovement('entrada', productId, cantidadNum, userId, `Entrada: ${observaciones || 'Sin observaciones'}`);
 
       await connection.commit();
       return result.insertId;
@@ -74,7 +82,15 @@ export class Entry {
     query += ' ORDER BY e.fecha DESC LIMIT ? OFFSET ?';
     const limit = parseInt(filters.limit) || 50;
     const offset = parseInt(filters.offset) || 0;
-    params.push(limit, offset);
+    
+    // Asegurar que limit y offset sean números válidos
+    if (isNaN(limit) || limit < 0) {
+      params.push(50, 0);
+    } else if (isNaN(offset) || offset < 0) {
+      params.push(limit, 0);
+    } else {
+      params.push(limit, offset);
+    }
 
     const [rows] = await pool.execute(query, params);
     return rows;

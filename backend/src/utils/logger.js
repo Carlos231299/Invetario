@@ -65,7 +65,15 @@ export const getMovements = async (filters = {}) => {
     const limit = parseInt(filters.limit) || 50;
     const offset = parseInt(filters.offset) || 0;
     query += ' LIMIT ? OFFSET ?';
-    params.push(limit, offset);
+    
+    // Asegurar que limit y offset sean números válidos
+    if (isNaN(limit) || limit < 0) {
+      params.push(50, 0);
+    } else if (isNaN(offset) || offset < 0) {
+      params.push(limit, 0);
+    } else {
+      params.push(limit, offset);
+    }
 
     const [rows] = await pool.execute(query, params);
     return rows;
