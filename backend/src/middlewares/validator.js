@@ -37,8 +37,7 @@ export const validateRegister = [
 ];
 
 export const validateForgotPassword = [
-  body('email').isEmail().withMessage('Email inválido'),
-  body('method').optional().isIn(['code', 'link']).withMessage('Método debe ser "code" o "link"')
+  body('email').isEmail().withMessage('Email inválido')
 ];
 
 export const validateResetPassword = [

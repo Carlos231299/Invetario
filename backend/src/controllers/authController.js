@@ -86,8 +86,8 @@ export const register = async (req, res, next) => {
 
 export const forgotPassword = async (req, res, next) => {
   try {
-    const { email, method = 'code' } = req.body;
-    const result = await requestPasswordReset(email, method);
+    const { email } = req.body;
+    const result = await requestPasswordReset(email);
     
     if (!result.success) {
       throw new AppError(result.message, 400);

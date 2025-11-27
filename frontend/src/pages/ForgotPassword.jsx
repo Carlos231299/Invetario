@@ -8,7 +8,6 @@ import { useForm } from '../hooks/useForm.js';
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
-  const [method, setMethod] = useState('code'); // 'code' o 'link'
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState(null);
   const { values, handleChange } = useForm({ email: '' });
@@ -19,22 +18,16 @@ const ForgotPassword = () => {
     setAlert(null);
 
     try {
-      const result = await authService.forgotPassword(values.email, method);
+      const result = await authService.forgotPassword(values.email);
       if (result.success) {
         setAlert({ 
           type: 'success', 
-          message: result.message || (method === 'code' 
-            ? 'Código enviado a tu correo electrónico' 
-            : 'Enlace enviado a tu correo electrónico')
+          message: result.message || 'Código de verificación enviado a tu correo electrónico'
         });
-        if (method === 'code') {
+        // Redirigir a la página de verificación de código
+        setTimeout(() => {
           navigate(`/reset-password?email=${encodeURIComponent(values.email)}`);
-        } else {
-          setAlert({ 
-            type: 'success', 
-            message: 'Revisa tu correo electrónico y haz clic en el enlace para restablecer tu contraseña' 
-          });
-        }
+        }, 1500);
       } else {
         setAlert({ type: 'error', message: result.message || 'Error al solicitar recuperación' });
       }
@@ -53,43 +46,17 @@ const ForgotPassword = () => {
             Recuperar Contraseña
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Elige el método de recuperación
+            Ingresa tu correo electrónico para recibir un código de verificación
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {alert && <Alert type={alert.type} message={alert.message} onClose={() => setAlert(null)} />}
           
-          {/* Selector de método */}
-          <div className="space-y-3">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Método de recuperación:
-            </label>
-            <div className="flex space-x-4">
-              <button
-                type="button"
-                onClick={() => setMethod('code')}
-                className={`flex-1 py-2 px-4 rounded-lg border-2 transition-colors ${
-                  method === 'code'
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
-                }`}
-              >
-                <div className="font-semibold">Por Código</div>
-                <div className="text-xs mt-1">Recibirás un código de 6 dígitos</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => setMethod('link')}
-                className={`flex-1 py-2 px-4 rounded-lg border-2 transition-colors ${
-                  method === 'link'
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
-                }`}
-              >
-                <div className="font-semibold">Por Enlace</div>
-                <div className="text-xs mt-1">Recibirás un enlace de un solo uso</div>
-              </button>
-            </div>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <p className="text-sm text-blue-800">
+              <strong>Proceso de recuperación:</strong> Primero verificarás tu identidad con un código de 6 dígitos, 
+              luego recibirás un enlace seguro de un solo uso para restablecer tu contraseña.
+            </p>
           </div>
 
           <Input
@@ -102,11 +69,7 @@ const ForgotPassword = () => {
             disabled={loading}
           />
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading 
-              ? 'Enviando...' 
-              : method === 'code' 
-                ? 'Enviar Código de Recuperación' 
-                : 'Enviar Enlace de Recuperación'}
+            {loading ? 'Enviando...' : 'Enviar Código de Verificación'}
           </Button>
           <div className="text-center">
             <a href="/login" className="text-sm text-blue-600 hover:text-blue-500">

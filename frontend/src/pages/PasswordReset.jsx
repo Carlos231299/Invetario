@@ -13,7 +13,7 @@ const PasswordReset = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
   const emailParam = searchParams.get('email');
-  const [step, setStep] = useState(token ? 'reset' : (emailParam ? 'verify' : 'request')); // request -> verify -> reset
+  const [step, setStep] = useState(token ? 'reset' : (emailParam ? 'verify' : 'request')); // request -> verify -> waiting-link -> reset
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState(null);
   const { values, handleChange, reset } = useForm({ email: emailParam || '', code: '', password: '', confirmPassword: '' });
@@ -61,8 +61,12 @@ const PasswordReset = () => {
     try {
       const result = await authService.verifyCode(values.email, values.code);
       if (result.success) {
-        setAlert({ type: 'success', message: 'Código verificado correctamente' });
-        setStep('reset');
+        setAlert({ 
+          type: 'success', 
+          message: 'Código verificado correctamente. Revisa tu correo electrónico para recibir el enlace de recuperación.' 
+        });
+        // Esperar a que el usuario reciba el link
+        setStep('waiting-link');
       } else {
         setAlert({ type: 'error', message: result.message || 'Código inválido' });
       }
@@ -93,14 +97,14 @@ const PasswordReset = () => {
     setAlert(null);
 
     try {
-      let result;
-      if (token) {
-        // Restablecer por token (link)
-        result = await authService.resetPasswordByToken(token, values.password);
-      } else {
-        // Restablecer por código
-        result = await authService.resetPassword(values.email, values.code, values.password);
+      if (!token) {
+        setAlert({ type: 'error', message: 'Token no válido. Por favor, usa el enlace enviado a tu correo.' });
+        setLoading(false);
+        return;
       }
+      
+      // Solo restablecer por token (link de un solo uso)
+      const result = await authService.resetPasswordByToken(token, values.password);
       
       if (result.success) {
         setAlert({ type: 'success', message: 'Contraseña restablecida correctamente' });
@@ -143,7 +147,7 @@ const PasswordReset = () => {
         <div className="max-w-md w-full space-y-8">
           <div>
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-              Verificar Código
+              Verificar Identidad
             </h2>
             <p className="mt-2 text-center text-sm text-gray-600">
               Ingresa el código de 6 dígitos enviado a {values.email}
@@ -188,6 +192,50 @@ const PasswordReset = () => {
     );
   }
 
+  if (step === 'waiting-link') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
+        <div className="max-w-md w-full space-y-8">
+          <div>
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+              Enlace Enviado
+            </h2>
+            <p className="mt-2 text-center text-sm text-gray-600">
+              Tu identidad ha sido verificada correctamente
+            </p>
+          </div>
+          <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+            <div className="text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-green-900 mb-2">
+                Revisa tu correo electrónico
+              </h3>
+              <p className="text-sm text-green-700 mb-4">
+                Se ha enviado un enlace seguro de un solo uso a <strong>{values.email}</strong>
+              </p>
+              <p className="text-xs text-green-600">
+                El enlace expirará en 15 minutos. Una vez usado, no podrá ser utilizado nuevamente.
+              </p>
+            </div>
+          </div>
+          {alert && <Alert type={alert.type} message={alert.message} onClose={() => setAlert(null)} />}
+          <div className="text-center">
+            <button
+              onClick={() => navigate('/login')}
+              className="text-sm text-blue-600 hover:text-blue-500"
+            >
+              Volver al login
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
       <div className="max-w-md w-full space-y-8">
@@ -195,6 +243,9 @@ const PasswordReset = () => {
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Restablecer Contraseña
           </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Tu identidad ha sido verificada. Ahora puedes establecer una nueva contraseña.
+          </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleResetPassword}>
           {alert && <Alert type={alert.type} message={alert.message} onClose={() => setAlert(null)} />}

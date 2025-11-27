@@ -46,9 +46,9 @@ export const authService = {
     return !!localStorage.getItem('token');
   },
 
-  forgotPassword: async (email, method = 'code') => {
+  forgotPassword: async (email) => {
     try {
-      const response = await api.post('/auth/forgot-password', { email, method });
+      const response = await api.post('/auth/forgot-password', { email });
       return response.data;
     } catch (error) {
       if (error.code === 'ERR_NETWORK' || error.message.includes('Network Error')) {
