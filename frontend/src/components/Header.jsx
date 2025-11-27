@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth.js';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   UserCircleIcon, 
   ArrowRightOnRectangleIcon,
@@ -13,6 +13,7 @@ import ConfirmDialog from './ConfirmDialog.jsx';
 const Header = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleLogout = () => {
@@ -58,15 +59,16 @@ const Header = () => {
                 </div>
               </div>
               <button 
-                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-                onClick={() => alert('Funcionalidad de notificaciones próximamente')}
+                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors relative"
+                onClick={() => navigate('/notifications')}
                 title="Notificaciones"
               >
                 <BellIcon className="h-5 w-5" />
+                <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
               </button>
               <button 
                 className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-                onClick={() => alert('Funcionalidad de configuración próximamente')}
+                onClick={() => navigate('/settings')}
                 title="Configuración"
               >
                 <Cog6ToothIcon className="h-5 w-5" />

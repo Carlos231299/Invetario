@@ -16,6 +16,8 @@ import Users from './pages/Users.jsx';
 import Movements from './pages/Movements.jsx';
 import PasswordReset from './pages/PasswordReset.jsx';
 import ForgotPassword from './pages/ForgotPassword.jsx';
+import Notifications from './pages/Notifications.jsx';
+import Settings from './pages/Settings.jsx';
 import Loading from './components/Loading.jsx';
 
 const queryClient = new QueryClient();
@@ -56,7 +58,7 @@ const AppContent = () => {
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50" style={{ paddingBottom: '280px' }}>
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 mb-64">
           <Routes>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/products" element={<Products />} />
@@ -66,6 +68,8 @@ const AppContent = () => {
             <Route path="/exits" element={<Exits />} />
             <Route path="/movements" element={<Movements />} />
             <Route path="/users" element={<Users />} />
+            <Route path="/notifications" element={<Notifications />} />
+            <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<Navigate to="/dashboard" />} />
           </Routes>
         </main>

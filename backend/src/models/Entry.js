@@ -58,7 +58,7 @@ export class Entry {
 
     if (filters.producto_id) {
       query += ' AND e.producto_id = ?';
-      params.push(filters.producto_id);
+      params.push(parseInt(filters.producto_id));
     }
 
     if (filters.fecha_desde) {
