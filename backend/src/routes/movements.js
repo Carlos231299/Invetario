@@ -1,10 +1,10 @@
 import express from 'express';
-import { getMovements } from '../controllers/movementController.js';
+import { getMovementsController } from '../controllers/movementController.js';
 import { authenticate } from '../middlewares/auth.js';
 
 const router = express.Router();
 
-router.get('/', authenticate, getMovements);
+router.get('/', authenticate, getMovementsController);
 
 export default router;
 
