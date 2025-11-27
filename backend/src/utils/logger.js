@@ -53,14 +53,10 @@ export const getMovements = async (filters = {}) => {
     }
 
     query += ' ORDER BY m.fecha DESC';
-    if (filters.limit) {
-      query += ' LIMIT ?';
-      params.push(filters.limit);
-      if (filters.offset) {
-        query += ' OFFSET ?';
-        params.push(filters.offset);
-      }
-    }
+    const limit = filters.limit || 50;
+    const offset = filters.offset || 0;
+    query += ' LIMIT ? OFFSET ?';
+    params.push(limit, offset);
 
     const [rows] = await pool.execute(query, params);
     return rows;
