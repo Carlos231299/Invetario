@@ -1,6 +1,6 @@
 import { User } from '../models/User.js';
 import { generateToken, generateRefreshToken } from '../config/jwt.js';
-import { requestPasswordReset, verifyResetCode, resetPassword } from '../services/passwordResetService.js';
+import { requestPasswordReset, verifyResetCode, resetPassword, resetPasswordByToken } from '../services/passwordResetService.js';
 import { AppError } from '../middlewares/errorHandler.js';
 
 export const login = async (req, res, next) => {
@@ -86,8 +86,8 @@ export const register = async (req, res, next) => {
 
 export const forgotPassword = async (req, res, next) => {
   try {
-    const { email } = req.body;
-    const result = await requestPasswordReset(email);
+    const { email, method = 'code' } = req.body;
+    const result = await requestPasswordReset(email, method);
     
     if (!result.success) {
       throw new AppError(result.message, 400);
@@ -122,8 +122,18 @@ export const verifyCode = async (req, res, next) => {
 
 export const resetPasswordController = async (req, res, next) => {
   try {
-    const { email, code, password } = req.body;
-    const result = await resetPassword(email, code, password);
+    const { email, code, token, password } = req.body;
+    
+    let result;
+    if (token) {
+      // Restablecer por token (link)
+      result = await resetPasswordByToken(token, password);
+    } else if (email && code) {
+      // Restablecer por código
+      result = await resetPassword(email, code, password);
+    } else {
+      throw new AppError('Se requiere token o código de verificación', 400);
+    }
     
     if (!result.success) {
       throw new AppError(result.message, 400);

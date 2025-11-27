@@ -41,12 +41,17 @@ export const validateForgotPassword = [
 ];
 
 export const validateResetPassword = [
-  body('email').isEmail().withMessage('Email inválido'),
-  body('code').isLength({ min: 6, max: 6 }).withMessage('El código debe tener 6 dígitos'),
   body('password').custom((value) => {
     const validation = validatePassword(value);
     if (!validation.isValid) {
       throw new Error(validation.errors.join('. '));
+    }
+    return true;
+  }),
+  body().custom((value) => {
+    // Debe tener token O (email y code)
+    if (!value.token && (!value.email || !value.code)) {
+      throw new Error('Se requiere token o código de verificación con email');
     }
     return true;
   })

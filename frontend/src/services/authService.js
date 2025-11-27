@@ -46,9 +46,9 @@ export const authService = {
     return !!localStorage.getItem('token');
   },
 
-  forgotPassword: async (email) => {
+  forgotPassword: async (email, method = 'code') => {
     try {
-      const response = await api.post('/auth/forgot-password', { email });
+      const response = await api.post('/auth/forgot-password', { email, method });
       return response.data;
     } catch (error) {
       if (error.code === 'ERR_NETWORK' || error.message.includes('Network Error')) {
@@ -85,6 +85,24 @@ export const authService = {
   resetPassword: async (email, code, password) => {
     try {
       const response = await api.post('/auth/reset-password', { email, code, password });
+      return response.data;
+    } catch (error) {
+      if (error.code === 'ERR_NETWORK' || error.message.includes('Network Error')) {
+        return {
+          success: false,
+          message: 'Error de conexión. Verifica que el servidor esté disponible.'
+        };
+      }
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Error al restablecer contraseña'
+      };
+    }
+  },
+
+  resetPasswordByToken: async (token, password) => {
+    try {
+      const response = await api.post('/auth/reset-password', { token, password });
       return response.data;
     } catch (error) {
       if (error.code === 'ERR_NETWORK' || error.message.includes('Network Error')) {

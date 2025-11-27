@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authService } from '../services/authService.js';
 import Button from '../components/Button.jsx';
 import Input from '../components/Input.jsx';
@@ -10,10 +10,23 @@ import { validatePassword, getPasswordRequirements } from '../utils/passwordVali
 
 const PasswordReset = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState('request'); // request -> verify -> reset
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token');
+  const emailParam = searchParams.get('email');
+  const [step, setStep] = useState(token ? 'reset' : (emailParam ? 'verify' : 'request')); // request -> verify -> reset
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState(null);
-  const { values, handleChange, reset } = useForm({ email: '', code: '', password: '', confirmPassword: '' });
+  const { values, handleChange, reset } = useForm({ email: emailParam || '', code: '', password: '', confirmPassword: '' });
+
+  useEffect(() => {
+    if (token) {
+      // Si hay token en la URL, ir directo a reset
+      setStep('reset');
+    } else if (emailParam) {
+      // Si hay email, ir a verificar código
+      setStep('verify');
+    }
+  }, [token, emailParam]);
 
   const handleRequestReset = async (e) => {
     e.preventDefault();
@@ -80,7 +93,15 @@ const PasswordReset = () => {
     setAlert(null);
 
     try {
-      const result = await authService.resetPassword(values.email, values.code, values.password);
+      let result;
+      if (token) {
+        // Restablecer por token (link)
+        result = await authService.resetPasswordByToken(token, values.password);
+      } else {
+        // Restablecer por código
+        result = await authService.resetPassword(values.email, values.code, values.password);
+      }
+      
       if (result.success) {
         setAlert({ type: 'success', message: 'Contraseña restablecida correctamente' });
         setTimeout(() => navigate('/login'), 2000);
@@ -103,29 +124,14 @@ const PasswordReset = () => {
               Recuperar Contraseña
             </h2>
             <p className="mt-2 text-center text-sm text-gray-600">
-              Ingresa tu correo electrónico para recibir un código de recuperación
+              Elige el método de recuperación
             </p>
           </div>
-          <form className="mt-8 space-y-6" onSubmit={handleRequestReset}>
-            {alert && <Alert type={alert.type} message={alert.message} onClose={() => setAlert(null)} />}
-            <Input
-              label="Email"
-              name="email"
-              type="email"
-              value={values.email}
-              onChange={handleChange}
-              required
-              disabled={loading}
-            />
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Enviando...' : 'Enviar Código de Recuperación'}
-            </Button>
-            <div className="text-center">
-              <a href="/login" className="text-sm text-blue-600 hover:text-blue-500">
-                Volver al login
-              </a>
-            </div>
-          </form>
+          <div className="text-center">
+            <a href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-500">
+              Ir a opciones de recuperación
+            </a>
+          </div>
         </div>
       </div>
     );
