@@ -41,12 +41,12 @@ export const getMovements = async (filters = {}) => {
       params.push(filters.tipo);
     }
 
-    if (filters.producto_id) {
+    if (filters.producto_id && !isNaN(parseInt(filters.producto_id))) {
       query += ' AND m.producto_id = ?';
       params.push(parseInt(filters.producto_id));
     }
 
-    if (filters.usuario_id) {
+    if (filters.usuario_id && !isNaN(parseInt(filters.usuario_id))) {
       query += ' AND m.usuario_id = ?';
       params.push(parseInt(filters.usuario_id));
     }

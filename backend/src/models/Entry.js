@@ -64,7 +64,7 @@ export class Entry {
     `;
     const params = [];
 
-    if (filters.producto_id) {
+    if (filters.producto_id && !isNaN(parseInt(filters.producto_id))) {
       query += ' AND e.producto_id = ?';
       params.push(parseInt(filters.producto_id));
     }
