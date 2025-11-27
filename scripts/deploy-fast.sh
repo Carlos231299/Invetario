@@ -146,23 +146,6 @@ server {
         proxy_cache_bypass \$http_upgrade;
         proxy_read_timeout 300s;
         proxy_connect_timeout 75s;
-        
-        # Headers CORS
-        add_header 'Access-Control-Allow-Origin' '*' always;
-        add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, PATCH, OPTIONS' always;
-        add_header 'Access-Control-Allow-Headers' 'Authorization, Content-Type' always;
-        add_header 'Access-Control-Allow-Credentials' 'true' always;
-        
-        # Manejar preflight requests
-        if (\$request_method = 'OPTIONS') {
-            add_header 'Access-Control-Allow-Origin' '*';
-            add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, PATCH, OPTIONS';
-            add_header 'Access-Control-Allow-Headers' 'Authorization, Content-Type';
-            add_header 'Access-Control-Max-Age' 1728000;
-            add_header 'Content-Type' 'text/plain; charset=utf-8';
-            add_header 'Content-Length' 0;
-            return 204;
-        }
     }
 }
 EOF"

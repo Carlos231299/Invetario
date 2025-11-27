@@ -30,11 +30,11 @@ app.use(helmet({
 // Configuración de CORS más permisiva
 const corsOptions = {
   origin: function (origin, callback) {
-    // En producción, permitir cualquier origen (ya que Nginx maneja CORS)
-    // En desarrollo, permitir localhost
+    // Permitir cualquier origen en producción (incluyendo IP y dominio)
     if (process.env.NODE_ENV === 'production') {
       callback(null, true);
     } else {
+      // En desarrollo, permitir localhost y el FRONTEND_URL
       const allowedOrigins = [
         'http://localhost:5173',
         'http://localhost:3000',
@@ -52,7 +52,9 @@ const corsOptions = {
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   exposedHeaders: ['Authorization'],
-  maxAge: 86400 // 24 horas
+  maxAge: 86400, // 24 horas
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 };
 
 app.use(cors(corsOptions));

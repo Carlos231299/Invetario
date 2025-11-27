@@ -61,6 +61,7 @@ const Login = () => {
               label="Email"
               name="email"
               type="email"
+              autoComplete="email"
               value={values.email}
               onChange={handleChange}
               error={errors.email}
@@ -69,6 +70,7 @@ const Login = () => {
             <PasswordInput
               label="Contraseña"
               name="password"
+              autoComplete="current-password"
               value={values.password}
               onChange={handleChange}
               error={errors.password}

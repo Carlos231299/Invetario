@@ -11,20 +11,38 @@ export const login = async (req, res, next) => {
       throw new AppError('Email y contraseña son requeridos', 400);
     }
 
-    const user = await User.findByEmail(email);
+    let user;
+    try {
+      user = await User.findByEmail(email);
+    } catch (dbError) {
+      console.error('Error al buscar usuario:', dbError);
+      throw new AppError('Error al conectar con la base de datos', 500);
+    }
 
     if (!user || !user.activo) {
       throw new AppError('Credenciales inválidas', 401);
     }
 
-    const isValidPassword = await User.verifyPassword(password, user.password);
+    let isValidPassword;
+    try {
+      isValidPassword = await User.verifyPassword(password, user.password);
+    } catch (passwordError) {
+      console.error('Error al verificar contraseña:', passwordError);
+      throw new AppError('Error al verificar credenciales', 500);
+    }
 
     if (!isValidPassword) {
       throw new AppError('Credenciales inválidas', 401);
     }
 
-    const token = generateToken({ id: user.id, email: user.email, rol: user.rol });
-    const refreshToken = generateRefreshToken({ id: user.id });
+    let token, refreshToken;
+    try {
+      token = generateToken({ id: user.id, email: user.email, rol: user.rol });
+      refreshToken = generateRefreshToken({ id: user.id });
+    } catch (tokenError) {
+      console.error('Error al generar token:', tokenError);
+      throw new AppError('Error al generar token de autenticación', 500);
+    }
 
     res.json({
       success: true,
