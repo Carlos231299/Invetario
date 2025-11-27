@@ -1,9 +1,31 @@
 import { User } from '../models/User.js';
 import { sendPasswordResetCode, sendPasswordResetLink, generateResetCode, generateResetToken } from './emailService.js';
 
+// Validar formato de email
+const isValidEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
 export const requestPasswordReset = async (email) => {
   try {
-    const user = await User.findByEmail(email);
+    // Validar que el email esté presente
+    if (!email) {
+      return { success: false, message: 'El correo electrónico es requerido' };
+    }
+
+    // Validar formato de email
+    if (!isValidEmail(email)) {
+      return { success: false, message: 'El formato del correo electrónico no es válido' };
+    }
+
+    let user;
+    try {
+      user = await User.findByEmail(email);
+    } catch (dbError) {
+      console.error('Error de base de datos al buscar usuario:', dbError);
+      return { success: false, message: 'Error al conectar con la base de datos. Por favor, intenta nuevamente más tarde.' };
+    }
     
     if (!user) {
       // Por seguridad, no revelamos si el email existe o no
@@ -19,33 +41,80 @@ export const requestPasswordReset = async (email) => {
     expires.setMinutes(expires.getMinutes() + 15); // Expira en 15 minutos
     
     const resetCode = generateResetCode();
-    await User.setResetCode(email, resetCode, expires);
+    
+    try {
+      await User.setResetCode(email, resetCode, expires);
+    } catch (dbError) {
+      console.error('Error de base de datos al guardar código de reset:', dbError);
+      return { success: false, message: 'Error al procesar la solicitud. Por favor, intenta nuevamente.' };
+    }
+    
     const emailResult = await sendPasswordResetCode(email, resetCode, user.nombre);
     
     if (!emailResult.success) {
       console.error('Error al enviar email:', emailResult.error);
-      return { success: false, message: 'Error al enviar el correo. Por favor, intenta nuevamente.' };
+      // Proporcionar mensaje más específico basado en el tipo de error
+      if (emailResult.error && emailResult.error.includes('autenticación')) {
+        return { success: false, message: 'Error de configuración del servidor de correo. Contacta al administrador.' };
+      } else if (emailResult.error && emailResult.error.includes('conexión')) {
+        return { success: false, message: 'Error de conexión con el servidor de correo. Por favor, intenta nuevamente más tarde.' };
+      } else if (emailResult.error && emailResult.error.includes('tiempo')) {
+        return { success: false, message: 'Tiempo de espera agotado al enviar el correo. Por favor, intenta nuevamente.' };
+      }
+      return { success: false, message: `Error al enviar el correo: ${emailResult.error || 'Error desconocido'}. Por favor, intenta nuevamente.` };
     }
     
     return { success: true, message: 'Código de verificación enviado a tu correo electrónico' };
   } catch (error) {
-    console.error('Error en requestPasswordReset:', error);
-    return { success: false, message: 'Error al procesar la solicitud. Por favor, intenta nuevamente.' };
+    console.error('Error inesperado en requestPasswordReset:', error);
+    console.error('Stack trace:', error.stack);
+    return { success: false, message: 'Error inesperado al procesar la solicitud. Por favor, intenta nuevamente o contacta al administrador.' };
   }
 };
 
 export const verifyResetCode = async (email, code) => {
   try {
-    const user = await User.findByEmail(email);
+    // Validar que el email y código estén presentes
+    if (!email) {
+      return { success: false, message: 'El correo electrónico es requerido' };
+    }
+
+    if (!code) {
+      return { success: false, message: 'El código de verificación es requerido' };
+    }
+
+    // Validar formato de email
+    if (!isValidEmail(email)) {
+      return { success: false, message: 'El formato del correo electrónico no es válido' };
+    }
+
+    // Validar formato del código (debe ser 6 dígitos)
+    if (!/^\d{6}$/.test(code)) {
+      return { success: false, message: 'El código de verificación debe tener 6 dígitos' };
+    }
+
+    let user;
+    try {
+      user = await User.findByEmail(email);
+    } catch (dbError) {
+      console.error('Error de base de datos al buscar usuario:', dbError);
+      return { success: false, message: 'Error al conectar con la base de datos. Por favor, intenta nuevamente más tarde.' };
+    }
     
     if (!user) {
       return { success: false, message: 'Usuario no encontrado' };
     }
 
-    const isValid = await User.verifyResetCode(email, code);
+    let isValid;
+    try {
+      isValid = await User.verifyResetCode(email, code);
+    } catch (dbError) {
+      console.error('Error de base de datos al verificar código:', dbError);
+      return { success: false, message: 'Error al verificar el código. Por favor, intenta nuevamente.' };
+    }
     
     if (!isValid) {
-      return { success: false, message: 'Código inválido o expirado' };
+      return { success: false, message: 'Código inválido o expirado. Por favor, solicita un nuevo código.' };
     }
 
     // Después de verificar el código, generar token y enviar link
@@ -54,18 +123,34 @@ export const verifyResetCode = async (email, code) => {
     expires.setMinutes(expires.getMinutes() + 15); // Expira en 15 minutos
     
     // Guardar el token
-    await User.setResetToken(email, resetToken, expires);
+    try {
+      await User.setResetToken(email, resetToken, expires);
+    } catch (dbError) {
+      console.error('Error de base de datos al guardar token:', dbError);
+      return { success: false, message: 'Error al procesar la solicitud. Por favor, intenta nuevamente.' };
+    }
     
     // Enviar el link por email
     const emailResult = await sendPasswordResetLink(email, resetToken, user.nombre);
     
     if (!emailResult.success) {
       console.error('Error al enviar email con link:', emailResult.error);
-      return { success: false, message: 'Error al enviar el enlace de recuperación. Por favor, intenta nuevamente.' };
+      // Proporcionar mensaje más específico
+      if (emailResult.error && emailResult.error.includes('autenticación')) {
+        return { success: false, message: 'Error de configuración del servidor de correo. Contacta al administrador.' };
+      } else if (emailResult.error && emailResult.error.includes('conexión')) {
+        return { success: false, message: 'Error de conexión con el servidor de correo. Por favor, intenta nuevamente más tarde.' };
+      }
+      return { success: false, message: `Error al enviar el enlace de recuperación: ${emailResult.error || 'Error desconocido'}. Por favor, intenta nuevamente.` };
     }
     
     // Limpiar el código ya que fue verificado
-    await User.clearResetCode(user.id);
+    try {
+      await User.clearResetCode(user.id);
+    } catch (dbError) {
+      console.error('Error al limpiar código (no crítico):', dbError);
+      // No fallar si no se puede limpiar el código
+    }
     
     return { 
       success: true, 
@@ -73,8 +158,9 @@ export const verifyResetCode = async (email, code) => {
       token: resetToken // Opcional, para debugging
     };
   } catch (error) {
-    console.error('Error en verifyResetCode:', error);
-    return { success: false, message: 'Error al verificar el código. Por favor, intenta nuevamente.' };
+    console.error('Error inesperado en verifyResetCode:', error);
+    console.error('Stack trace:', error.stack);
+    return { success: false, message: 'Error inesperado al verificar el código. Por favor, intenta nuevamente o contacta al administrador.' };
   }
 };
 

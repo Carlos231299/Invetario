@@ -54,24 +54,26 @@ const AppContent = () => {
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-screen">
         <Header />
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50">
-          <Routes>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/categories" element={<Categories />} />
-            <Route path="/suppliers" element={<Suppliers />} />
-            <Route path="/entries" element={<Entries />} />
-            <Route path="/exits" element={<Exits />} />
-            <Route path="/movements" element={<Movements />} />
-            <Route path="/users" element={<Users />} />
-            <Route path="/notifications" element={<Notifications />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="*" element={<Navigate to="/dashboard" />} />
-          </Routes>
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 pb-4">
+          <div className="min-h-[calc(100vh-200px)]">
+            <Routes>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/categories" element={<Categories />} />
+              <Route path="/suppliers" element={<Suppliers />} />
+              <Route path="/entries" element={<Entries />} />
+              <Route path="/exits" element={<Exits />} />
+              <Route path="/movements" element={<Movements />} />
+              <Route path="/users" element={<Users />} />
+              <Route path="/notifications" element={<Notifications />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="*" element={<Navigate to="/dashboard" />} />
+            </Routes>
+          </div>
         </main>
         <Footer />
       </div>

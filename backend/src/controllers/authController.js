@@ -84,12 +84,30 @@ export const register = async (req, res, next) => {
   }
 };
 
+// Validar formato de email
+const isValidEmailFormat = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
 export const forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
+
+    // Validar que el email esté presente
+    if (!email) {
+      throw new AppError('El correo electrónico es requerido', 400);
+    }
+
+    // Validar formato de email
+    if (!isValidEmailFormat(email)) {
+      throw new AppError('El formato del correo electrónico no es válido', 400);
+    }
+
     const result = await requestPasswordReset(email);
     
     if (!result.success) {
+      // El servicio ya proporciona mensajes descriptivos
       throw new AppError(result.message, 400);
     }
 
@@ -98,16 +116,44 @@ export const forgotPassword = async (req, res, next) => {
       message: result.message
     });
   } catch (error) {
-    next(error);
+    // Si ya es un AppError, pasarlo directamente
+    if (error instanceof AppError) {
+      return next(error);
+    }
+    // Para otros errores, loggear y devolver mensaje genérico
+    console.error('Error inesperado en forgotPassword:', error);
+    next(new AppError('Error inesperado al procesar la solicitud. Por favor, intenta nuevamente.', 500));
   }
 };
 
 export const verifyCode = async (req, res, next) => {
   try {
     const { email, code } = req.body;
+
+    // Validar que el email esté presente
+    if (!email) {
+      throw new AppError('El correo electrónico es requerido', 400);
+    }
+
+    // Validar que el código esté presente
+    if (!code) {
+      throw new AppError('El código de verificación es requerido', 400);
+    }
+
+    // Validar formato de email
+    if (!isValidEmailFormat(email)) {
+      throw new AppError('El formato del correo electrónico no es válido', 400);
+    }
+
+    // Validar formato del código (debe ser 6 dígitos)
+    if (!/^\d{6}$/.test(code)) {
+      throw new AppError('El código de verificación debe tener 6 dígitos', 400);
+    }
+
     const result = await verifyResetCode(email, code);
     
     if (!result.success) {
+      // El servicio ya proporciona mensajes descriptivos
       throw new AppError(result.message, 400);
     }
 
@@ -116,7 +162,13 @@ export const verifyCode = async (req, res, next) => {
       message: result.message
     });
   } catch (error) {
-    next(error);
+    // Si ya es un AppError, pasarlo directamente
+    if (error instanceof AppError) {
+      return next(error);
+    }
+    // Para otros errores, loggear y devolver mensaje genérico
+    console.error('Error inesperado en verifyCode:', error);
+    next(new AppError('Error inesperado al verificar el código. Por favor, intenta nuevamente.', 500));
   }
 };
 
