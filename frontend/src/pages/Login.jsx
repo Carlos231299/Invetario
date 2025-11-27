@@ -39,17 +39,26 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        <div className="text-center">
+          <div className="flex justify-center mb-4">
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center shadow-xl transform hover:scale-105 transition-transform">
+              <span className="text-white font-bold text-3xl">IB</span>
+            </div>
+          </div>
+          <h2 className="text-3xl font-extrabold text-gray-900 mb-2">
             Inventario Ferretería Bastidas
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Inicia sesión en tu cuenta
+          <p className="text-sm text-gray-600">
+            Sistema de gestión de inventario profesional
+          </p>
+          <p className="mt-1 text-xs text-gray-500">
+            Inicia sesión para continuar
           </p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+          <form className="space-y-6" onSubmit={handleSubmit}>
           {alert && (
             <Alert
               type={alert.type}
@@ -87,15 +96,19 @@ const Login = () => {
               {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
             </Button>
           </div>
-          <div className="text-center">
-            <a
-              href="/forgot-password"
-              className="text-sm text-blue-600 hover:text-blue-500"
-            >
-              ¿Olvidaste tu contraseña?
-            </a>
-          </div>
-        </form>
+            <div className="text-center pt-4 border-t border-gray-200">
+              <a
+                href="/forgot-password"
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+              >
+                ¿Olvidaste tu contraseña?
+              </a>
+            </div>
+          </form>
+        </div>
+        <p className="text-center text-xs text-gray-500">
+          © {new Date().getFullYear()} Ferretería Bastidas. Todos los derechos reservados.
+        </p>
       </div>
     </div>
   );
