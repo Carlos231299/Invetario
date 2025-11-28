@@ -9,7 +9,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 PEM_FILE="$PROJECT_ROOT/plataforma2.0.pem"
-SERVER="ubuntu@ec2-54-193-218-76.us-west-1.compute.amazonaws.com"
+SERVER="ubuntu@ec2-13-57-42-47.us-west-1.compute.amazonaws.com"
 APP_DIR="/var/www/inventario-ferreteria-bastidas"
 LOCAL_DIR="$PROJECT_ROOT"
 
@@ -99,7 +99,7 @@ echo "🔧 Configurando backend..."
 ssh_exec "cd $APP_DIR/backend && npm install --production"
 
 # Crear .env desde .env.example
-SERVER_URL="http://ec2-54-193-218-76.us-west-1.compute.amazonaws.com"
+SERVER_URL="http://ec2-13-57-42-47.us-west-1.compute.amazonaws.com"
 ssh_exec "cd $APP_DIR/backend && if [ ! -f .env ]; then cp .env.example .env; fi"
 ssh_exec "cd $APP_DIR/backend && sed -i 's|FRONTEND_URL=.*|FRONTEND_URL=$SERVER_URL|' .env"
 
@@ -167,5 +167,5 @@ ssh_exec "sudo rm -f /etc/nginx/sites-enabled/default"
 ssh_exec "sudo nginx -t && sudo systemctl reload nginx"
 
 echo "✅ Despliegue completado exitosamente!"
-echo "🌍 La aplicación está disponible en: http://ec2-54-193-218-76.us-west-1.compute.amazonaws.com"
+echo "🌍 La aplicación está disponible en: http://ec2-13-57-42-47.us-west-1.compute.amazonaws.com"
 
